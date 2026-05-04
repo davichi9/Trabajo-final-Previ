@@ -56,11 +56,13 @@ Luego ejecuta:
 php bin/console doctrine:migrations:migrate
 ```
 
-### 4. Iniciar el servidor (opcional)
+### 4. Iniciar el servidor
 
 ```bash
-php bin/console server:run
+symfony serve
 ```
+
+El servidor estará disponible en `http://127.0.0.1:8000`
 
 ## Base de datos
 
