@@ -43,6 +43,10 @@ Si estás usando XAMPP, asegúrate de que MySQL esté ejecutándose.
    ```bash
    php bin/console doctrine:migrations:migrate
    ```
+   Para insertar datos de prueba:
+   ```
+   php bin/console app:load-fixtures
+   ```
 
 #### Opción B: Usando MySQL local
 
