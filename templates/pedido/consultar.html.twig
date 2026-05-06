@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Consultar Pedido – Tintorería Previ{% endblock %}
+
+{% block body %}
+
+    <section class="section">
+        <div class="container container-sm">
+            <div class="pedido-card">
+                <span class="hero-icon">🔍</span>
+                <h1>Consultar mi pedido</h1>
+                <p>Introduce tu número de pedido y tu teléfono para ver el estado de tu ropa.</p>
+
+                <form class="pedido-form" method="post" action="{{ path('app_pedido') }}">
+                    <div class="form-group">
+                        <label for="numeroPedido">Número de pedido</label>
+                        <input
+                            type="text"
+                            id="numeroPedido"
+                            name="numeroPedido"
+                            placeholder="Ej: 00123"
+                            required
+                            pattern="[0-9]+"
+                            title="Solo números"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="telefono">Número de teléfono</label>
+                        <input
+                            type="tel"
+                            id="telefono"
+                            name="telefono"
+                            placeholder="Ej: 600000000"
+                            required
+                            pattern="[0-9]{9}"
+                            title="9 dígitos sin espacios"
+                        >
+                    </div>
+                    <button type="submit" class="btn-primary btn-block">Consultar estado</button>
+                </form>
+
+                <p class="pedido-help">
+                    ¿No encuentras tu número de pedido? Llámanos al
+                    <a href="tel:+34600000000">+34 600 000 000</a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}

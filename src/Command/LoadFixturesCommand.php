@@ -134,7 +134,7 @@ class LoadFixturesCommand extends Command
             $t->setApellidos($trabajador['apellidos']);
             $t->setTelefonoNumero($trabajador['telefono']);
             $t->setEmail($trabajador['email']);
-            $t->setContraseña($trabajador['contraseña']);
+            $t->setContraseña(password_hash($trabajador['contraseña'], PASSWORD_BCRYPT));
             $t->setRol($trabajador['rol']);
             $this->entityManager->persist($t);
         }
