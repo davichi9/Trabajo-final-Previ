@@ -28,12 +28,12 @@
             </div>
             <nav class="header-nav">
                 <a href="{{ path('app_home') }}">Inicio</a>
-                <a href="{{ path('app_home') }}#precios">Precios</a>
+                <a href="{{ path('app_precios') }}">Precios</a>
                 <a href="{{ path('app_home') }}#ubicacion">Ubicación</a>
                 <a href="{{ path('app_home') }}#contacto">Contacto</a>
             </nav>
             <div class="header-right">
-                <a href="/login" class="btn-login">Acceso Empleados</a>
+                <a href="{{ path('app_login') }}" class="btn-login">Acceso Empleados</a>
             </div>
         </header>
 

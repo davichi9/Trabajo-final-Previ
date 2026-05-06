@@ -1,0 +1,206 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Precios – Tintorería Previ{% endblock %}
+
+{% block body %}
+<section class="section">
+    <div class="container">
+        <h1 class="precios-title">Calculadora de precio estimado</h1>
+        <p class="precios-subtitle">Selecciona las prendas que quieres traer y calcula el precio antes de venir.</p>
+
+        <div class="calc-layout">
+
+            {# TABLA DE PRENDAS #}
+            <div class="calc-table-wrap">
+                <table class="calc-table">
+                    <thead>
+                        <tr>
+                            <th>Prenda</th>
+                            <th>Precio</th>
+                            <th>Cantidad</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prenda in prendas %}
+                        {% if prenda.unidad == 'm²' %}
+                        <tr id="alfombra-row">
+                            <td>{{ prenda.nombre }}</td>
+                            <td class="price-col">
+                                desde {{ prenda.precio|number_format(2, ',', '.') }} €/m²
+                            </td>
+                            <td class="qty-col" colspan="2">
+                                <div id="alfombras-container">
+                                    <div class="alfombra-entry">
+                                        <input
+                                            type="number"
+                                            class="qty-input qty-input-m2 alfombra-m2"
+                                            value=""
+                                            min="0"
+                                            step="0.5"
+                                            data-precio="{{ prenda.precio }}"
+                                            placeholder="m²"
+                                            oninput="actualizarTotal()"
+                                        >
+                                        <span class="m2-label">m²</span>
+                                        <span class="alfombra-subtotal">0,00 €</span>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn-add-alfombra" onclick="añadirAlfombra({{ prenda.precio }})">
+                                    + Añadir otra alfombra
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="alfombra-total-row">
+                            <td colspan="3" style="text-align:right; font-size:0.9rem; color:#555;">Subtotal alfombras:</td>
+                            <td class="subtotal-col"><span id="subtotal-alfombras">0,00 €</span></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td>{{ prenda.nombre }}</td>
+                            <td class="price-col">
+                                {% if prenda.desde %}desde {% endif %}
+                                {{ prenda.precio|number_format(2, ',', '.') }} €
+                            </td>
+                            <td class="qty-col">
+                                <div class="qty-control">
+                                    <button type="button" class="qty-btn" onclick="cambiarCantidad(this, -1)">−</button>
+                                    <input
+                                        type="number"
+                                        class="qty-input"
+                                        value="0"
+                                        min="0"
+                                        max="99"
+                                        data-precio="{{ prenda.precio }}"
+                                        data-nombre="{{ prenda.nombre }}"
+                                        data-unidad="{{ prenda.unidad }}"
+                                        onchange="actualizarTotal()"
+                                    >
+                                    <button type="button" class="qty-btn" onclick="cambiarCantidad(this, 1)">+</button>
+                                </div>
+                            </td>
+                            <td class="subtotal-col">
+                                <span class="subtotal">0,00 €</span>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {# RESUMEN #}
+            <aside class="calc-resumen">
+                <h2>Resumen</h2>
+                <ul class="resumen-lista" id="resumenLista">
+                    <li class="resumen-empty">No has añadido ninguna prenda.</li>
+                </ul>
+                <div class="resumen-total">
+                    <span>Total estimado</span>
+                    <span id="totalGlobal">0,00 €</span>
+                </div>
+                <p class="resumen-aviso">* Los precios marcados con "desde" pueden variar según el estado y tipo de prenda.</p>
+                <a href="tel:+34630233032" class="btn-primary btn-block" style="margin-top:1.2rem;">
+                    <i class="fas fa-phone"></i> Llamar para confirmar
+                </a>
+            </aside>
+
+        </div>
+    </div>
+</section>
+
+<script>
+const PRECIO_ALFOMBRA = document.querySelector('.alfombra-m2') ? parseFloat(document.querySelector('.alfombra-m2').dataset.precio) : 12;
+
+function cambiarCantidad(btn, delta) {
+    const input = btn.parentElement.querySelector('.qty-input');
+    const nuevo = Math.max(0, Math.min(99, parseInt(input.value || 0) + delta));
+    input.value = nuevo;
+    actualizarTotal();
+}
+
+function añadirAlfombra(precio) {
+    const container = document.getElementById('alfombras-container');
+    const div = document.createElement('div');
+    div.className = 'alfombra-entry';
+    div.innerHTML = `
+        <input type="number" class="qty-input qty-input-m2 alfombra-m2"
+            value="" min="0" step="0.5" data-precio="${precio}"
+            placeholder="m²" oninput="actualizarTotal()">
+        <span class="m2-label">m²</span>
+        <span class="alfombra-subtotal">0,00 €</span>
+        <button type="button" class="btn-remove-alfombra" onclick="eliminarAlfombra(this)">✕</button>
+    `;
+    container.appendChild(div);
+    actualizarTotal();
+}
+
+function eliminarAlfombra(btn) {
+    btn.closest('.alfombra-entry').remove();
+    actualizarTotal();
+}
+
+function actualizarTotal() {
+    // Prendas normales
+    const inputs = document.querySelectorAll('.qty-input:not(.alfombra-m2)');
+    let total = 0;
+    const resumenLista = document.getElementById('resumenLista');
+    resumenLista.innerHTML = '';
+
+    inputs.forEach(input => {
+        const qty = parseInt(input.value) || 0;
+        const precio = parseFloat(input.dataset.precio);
+        const subtotal = qty * precio;
+        const nombre = input.dataset.nombre;
+
+        const row = input.closest('tr');
+        row.querySelector('.subtotal').textContent = formatEur(subtotal);
+
+        if (qty > 0) {
+            total += subtotal;
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${nombre} × ${qty}</span><span>${formatEur(subtotal)}</span>`;
+            resumenLista.appendChild(li);
+        }
+    });
+
+    // Alfombras
+    const alfombraInputs = document.querySelectorAll('.alfombra-m2');
+    let totalAlfombras = 0;
+    let numAlfombra = 1;
+
+    alfombraInputs.forEach(input => {
+        const m2 = parseFloat(input.value) || 0;
+        const precio = parseFloat(input.dataset.precio);
+        const subtotal = m2 * precio;
+        input.closest('.alfombra-entry').querySelector('.alfombra-subtotal').textContent = formatEur(subtotal);
+
+        if (m2 > 0) {
+            totalAlfombras += subtotal;
+            total += subtotal;
+            const li = document.createElement('li');
+            const label = alfombraInputs.length > 1 ? `Alfombra ${numAlfombra}` : 'Alfombra';
+            li.innerHTML = `<span>${label} (${formatNum(m2)} m²)</span><span>${formatEur(subtotal)}</span>`;
+            resumenLista.appendChild(li);
+            numAlfombra++;
+        }
+    });
+
+    document.getElementById('subtotal-alfombras').textContent = formatEur(totalAlfombras);
+
+    if (resumenLista.children.length === 0) {
+        resumenLista.innerHTML = '<li class="resumen-empty">No has añadido ninguna prenda.</li>';
+    }
+
+    document.getElementById('totalGlobal').textContent = formatEur(total);
+}
+
+function formatEur(num) {
+    return num.toFixed(2).replace('.', ',') + ' €';
+}
+
+function formatNum(num) {
+    return num % 1 === 0 ? num.toString() : num.toFixed(1).replace('.', ',');
+}
+</script>
+{% endblock %}
