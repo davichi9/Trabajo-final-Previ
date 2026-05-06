@@ -47,6 +47,14 @@ Si estás usando XAMPP, asegúrate de que MySQL esté ejecutándose.
    ```
    php bin/console app:load-fixtures
    ```
+   Datos de los usuarios:
+   
+| Nombre | Email | Contraseña | Rol |
+|--------|-------|------------|-----|
+| Carlos Hernández | carlos.hernandez@empresa.com | password123 | admin |
+| Elena Fernández | elena.fernandez@empresa.com | password123 | supervisor |
+| David Jiménez | david.jimenez@empresa.com | password123 | worker |
+
 
 #### Opción B: Usando MySQL local
 
@@ -82,3 +90,6 @@ El servidor estará disponible en `http://127.0.0.1:8000`
 - `no terminado`: Pedido en progreso
 - `terminado`: Pedido completado, listo para recoger
 - `recogido`: Pedido entregado al cliente
+
+### Trabajadores (Credenciales de prueba)
+
