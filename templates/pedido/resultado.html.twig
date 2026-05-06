@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Estado del Pedido – Tintorería Previ{% endblock %}
+
+{% block body %}
+
+    <section class="section">
+        <div class="container container-sm">
+            <div class="pedido-card">
+
+                <span class="hero-icon">🧾</span>
+                <h1>Tu pedido</h1>
+                <p>Aquí tienes la información de tu pedido.</p>
+
+                <a href="{{ path('app_pedido') }}" class="btn-secondary btn-block" style="margin-top: 1.5rem;">
+                    ← Volver a consultar
+                </a>
+
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
