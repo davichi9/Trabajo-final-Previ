@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Estado del Pedido #{{ pedido.id }} – Tintorería Previ{% endblock %}
+{% block title %}Estado del Pedido – Tintorería Previ{% endblock %}
 
 {% block body %}
 
@@ -11,57 +11,6 @@
                 <span class="hero-icon">🧾</span>
                 <h1>Tu pedido</h1>
                 <p>Aquí tienes la información de tu pedido.</p>
-
-                <div class="pedido-info">
-
-                    <div class="info-row">
-                        <span class="info-label">Número de pedido</span>
-                        <span class="info-value">#{{ pedido.id }}</span>
-                    </div>
-
-                    <div class="info-row">
-                        <span class="info-label">Estado</span>
-                        <span class="badge badge--{{ pedido.estado|replace({' ': '-'}) }}">
-                            {% if pedido.estado == 'no terminado' %}
-                                🔧 En proceso
-                            {% elseif pedido.estado == 'terminado' %}
-                                ✅ Listo para recoger
-                            {% elseif pedido.estado == 'recogido' %}
-                                📦 Recogido
-                            {% else %}
-                                {{ pedido.estado }}
-                            {% endif %}
-                        </span>
-                    </div>
-
-                    <div class="info-row">
-                        <span class="info-label">Contenido</span>
-                        <span class="info-value">{{ pedido.contenido }}</span>
-                    </div>
-
-                    <div class="info-row">
-                        <span class="info-label">Fecha de entrada</span>
-                        <span class="info-value">{{ pedido.fechaEntrada|date('d/m/Y') }}</span>
-                    </div>
-
-                    {% if pedido.fechaSalida %}
-                    <div class="info-row">
-                        <span class="info-label">Fecha de salida</span>
-                        <span class="info-value">{{ pedido.fechaSalida|date('d/m/Y') }}</span>
-                    </div>
-                    {% endif %}
-
-                    <div class="info-row">
-                        <span class="info-label">Precio</span>
-                        <span class="info-value">{{ pedido.precio|number_format(2, ',', '.') }} €</span>
-                    </div>
-
-                    <div class="info-row">
-                        <span class="info-label">Pagado</span>
-                        <span class="info-value">{{ pedido.pagado ? '✅ Sí' : '❌ No' }}</span>
-                    </div>
-
-                </div>
 
                 <a href="{{ path('app_pedido') }}" class="btn-secondary btn-block" style="margin-top: 1.5rem;">
                     ← Volver a consultar
