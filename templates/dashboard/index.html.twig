@@ -1,0 +1,65 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Dashboard - Lavandería{% endblock %}
+
+{% block body %}
+<div class="dashboard-container">
+    <nav class="dashboard-navbar">
+        <div class="dashboard-navbar-content">
+            <h2>Lavandería - Dashboard</h2>
+            <div class="navbar-user">
+                <span>Bienvenido, {{ trabajador_name }} <span class="badge">{{ trabajador_role }}</span></span>
+                <form method="POST" action="{{ path('app_logout') }}" class="logout-form">
+                    <button type="submit" class="btn-logout">Cerrar Sesión</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-content">
+        <h1>Panel de Control</h1>
+        
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <h3>Pedidos</h3>
+                <p>Gestiona los pedidos de lavandería</p>
+                <a href="#" class="btn-primary">Ver Pedidos</a>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>Clientes</h3>
+                <p>Administra la información de clientes</p>
+                <a href="#" class="btn-primary">Ver Clientes</a>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>Servicios</h3>
+                <p>Gestiona los servicios de lavandería</p>
+                <a href="#" class="btn-primary">Ver Servicios</a>
+            </div>
+
+            {% if trabajador_role == 'admin' or trabajador_role == 'supervisor' %}
+            <div class="dashboard-card">
+                <h3>Empleados</h3>
+                <p>Administra el personal</p>
+                <a href="#" class="btn-primary">Ver Empleados</a>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>Reportes</h3>
+                <p>Consulta reportes y estadísticas</p>
+                <a href="#" class="btn-primary">Ver Reportes</a>
+            </div>
+            {% endif %}
+
+            {% if trabajador_role == 'admin' %}
+            <div class="dashboard-card">
+                <h3>Configuración</h3>
+                <p>Ajustes del sistema</p>
+                <a href="#" class="btn-primary">Configurar</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

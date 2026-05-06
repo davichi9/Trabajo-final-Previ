@@ -101,6 +101,30 @@ a { color: inherit; text-decoration: none; }
 
 .btn-primary:hover { background: #e05a00; transform: translateY(-1px); }
 
+.btn-secondary {
+    display: inline-block;
+    background: transparent;
+    color: #fff;
+    font-weight: 700;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    border: 2px solid #fff;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-left: 1rem;
+}
+
+.btn-secondary:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+
+.hero-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
 .btn-block { display: block; width: 100%; text-align: center; }
 
 /* ===== SECTIONS ===== */
@@ -218,6 +242,191 @@ a { color: inherit; text-decoration: none; }
 
 .pedido-help a { color: #ff6a00; font-weight: 600; }
 
+/* ===== LOGIN PAGE ===== */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 64px);
+    background: #f5f5f5;
+    padding: 2rem 1rem;
+}
+
+.login-card {
+    background: #fff;
+    padding: 2.5rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    width: 100%;
+    max-width: 380px;
+    border-top: 5px solid #ff6a00;
+}
+
+.login-card h1 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #111;
+    font-size: 1.8rem;
+}
+
+.alert-error {
+    background: #fee;
+    border: 1px solid #fcc;
+    color: #c33;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.login-form { width: 100%; }
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+    outline: none;
+    font-family: inherit;
+}
+
+.form-input:focus {
+    border-color: #ff6a00;
+}
+
+.login-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+.login-link {
+    color: #ff6a00;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+
+.login-link:hover {
+    color: #e05a00;
+}
+
+/* ===== DASHBOARD ===== */
+.dashboard-container {
+    min-height: calc(100vh - 64px);
+    background: #f5f5f5;
+}
+
+.dashboard-navbar {
+    background: #111;
+    color: #fff;
+    padding: 1.2rem 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.dashboard-navbar-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem;
+}
+
+.dashboard-navbar h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.navbar-user {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    color: #ccc;
+    font-size: 0.95rem;
+}
+
+.badge {
+    background: #ff6a00;
+    color: #fff;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+.logout-form {
+    margin: 0;
+}
+
+.btn-logout {
+    background: transparent;
+    color: #fff;
+    border: 1px solid #ff6a00;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-logout:hover {
+    background: #ff6a00;
+    color: #fff;
+}
+
+.dashboard-content {
+    max-width: 1100px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+.dashboard-content h1 {
+    color: #111;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.dashboard-card {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+    border-top: 4px solid #ff6a00;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.dashboard-card h3 {
+    color: #111;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.dashboard-card p {
+    color: #555;
+    margin-bottom: 1.2rem;
+    font-size: 0.95rem;
+}
+
+.dashboard-card .btn-primary {
+    display: inline-block;
+}
+
 /* ===== FOOTER ===== */
 .site-footer {
     background: #111;
@@ -258,5 +467,7 @@ a { color: inherit; text-decoration: none; }
     .header-nav { display: none; }
     .ubicacion-grid { grid-template-columns: 1fr; }
     .hero-content h1 { font-size: 1.7rem; }
+    .hero-buttons { flex-direction: column; }
+    .btn-secondary { margin-left: 0; }
     .pedido-card { padding: 2rem 1.2rem; }
 }
