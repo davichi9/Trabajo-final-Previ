@@ -33,8 +33,16 @@ class PedidoController extends AbstractController
     }
 
     #[Route('/pedido/resultado/{id}', name: 'app_pedido_resultado_show', methods: ['GET'])]
-    public function resultadoShow(int $id): Response
+    public function resultadoShow(int $id, PedidosRepository $pedidosRepository): Response
     {
-        return $this->render('pedido/resultado.html.twig');
+        $pedido = $pedidosRepository->find($id);
+
+        if (!$pedido) {
+            return $this->redirectToRoute('app_pedido');
+        }
+
+        return $this->render('pedido/resultado.html.twig', [
+            'pedido' => $pedido,
+        ]);
     }
 }

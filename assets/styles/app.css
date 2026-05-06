@@ -475,6 +475,99 @@ a { color: inherit; text-decoration: none; }
     padding-top: 1rem;
 }
 
+/* ===== RESULTADO PEDIDO ===== */
+.resultado-container {
+    max-width: 760px;
+    padding: 2.5rem 1.5rem;
+}
+
+.resultado-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.resultado-header h1 {
+    font-size: 2rem;
+    color: #111;
+    margin-bottom: 0.3rem;
+}
+
+.resultado-num { color: #ff6a00; }
+
+.resultado-sub { color: #666; font-size: 1rem; }
+
+.badge-lg {
+    font-size: 1rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.badge--no-terminado { background: #fff3e0; color: #e65c00; }
+.badge--terminado    { background: #e8f5e9; color: #2e7d32; }
+.badge--recogido     { background: #e3f2fd; color: #1565c0; }
+
+.resultado-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(255, 106, 0, 0.13);
+}
+
+.resultado-tabla tbody tr {
+    border-bottom: 1px solid #eee;
+}
+
+.resultado-tabla tbody tr:last-child {
+    border-bottom: none;
+}
+
+.resultado-tabla th {
+    text-align: left;
+    padding: 1rem 1.2rem;
+    color: #555;
+    font-weight: 600;
+    background: #f9f9f9;
+    width: 38%;
+}
+
+.resultado-tabla td {
+    padding: 1rem 1.2rem;
+    color: #111;
+}
+
+.pagado-si { color: #2e7d32 !important; font-weight: 700; }
+.pagado-no { color: #c62828 !important; font-weight: 700; }
+
+.resultado-footer {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.btn-secondary {
+    display: inline-block;
+    background: #f0f0f0;
+    color: #111;
+    font-weight: 600;
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-decoration: none;
+}
+
+.btn-secondary:hover { background: #e0e0e0; }
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     .header-nav { display: none; }
@@ -483,6 +576,8 @@ a { color: inherit; text-decoration: none; }
     .hero-buttons { flex-direction: column; }
     .btn-secondary { margin-left: 0; }
     .pedido-card { padding: 2rem 1.2rem; }
+    .resultado-header { flex-direction: column; }
+    .resultado-tabla th, .resultado-tabla td { padding: 0.75rem 0.8rem; }
     .calc-layout { flex-direction: column; }
 }
 

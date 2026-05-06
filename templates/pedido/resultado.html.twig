@@ -1,22 +1,67 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Estado del Pedido – Tintorería Previ{% endblock %}
+{% block title %}Pedido #{{ pedido.id }} – Tintorería Previ{% endblock %}
 
 {% block body %}
 
     <section class="section">
-        <div class="container container-sm">
-            <div class="pedido-card">
+        <div class="container resultado-container">
 
-                <span class="hero-icon">🧾</span>
-                <h1>Tu pedido</h1>
-                <p>Aquí tienes la información de tu pedido.</p>
+            <div class="resultado-header">
+                <div>
+                    <h1>Pedido <span class="resultado-num">#{{ pedido.id }}</span></h1>
+                    <p class="resultado-sub">Aquí tienes el estado actual de tu pedido.</p>
+                </div>
+                <span class="badge badge--{{ pedido.estado|replace({' ': '-'}) }} badge-lg">
+                    {% if pedido.estado == 'no terminado' %}
+                        En proceso
+                    {% elseif pedido.estado == 'terminado' %}
+                        Listo para recoger
+                    {% elseif pedido.estado == 'recogido' %}
+                        Recogido
+                    {% else %}
+                        {{ pedido.estado }}
+                    {% endif %}
+                </span>
+            </div>
 
-                <a href="{{ path('app_pedido') }}" class="btn-secondary btn-block" style="margin-top: 1.5rem;">
+            <table class="resultado-tabla">
+                <tbody>
+                    <tr>
+                        <th>Número de pedido</th>
+                        <td>#{{ pedido.id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Contenido</th>
+                        <td>{{ pedido.contenido }}</td>
+                    </tr>
+                    <tr>
+                        <th>Fecha de entrada</th>
+                        <td>{{ pedido.fechaEntrada|date('d/m/Y') }}</td>
+                    </tr>
+                    {% if pedido.fechaSalida %}
+                    <tr>
+                        <th>Fecha de salida</th>
+                        <td>{{ pedido.fechaSalida|date('d/m/Y') }}</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <th>Precio</th>
+                        <td><strong>{{ pedido.precio|number_format(2, ',', '.') }} €</strong></td>
+                    </tr>
+                    <tr>
+                        <th>Pagado</th>
+                        <td class="{{ pedido.pagado ? 'pagado-si' : 'pagado-no' }}">{{ pedido.pagado ? 'Sí' : 'No' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="resultado-footer">
+                <a href="{{ path('app_pedido') }}" class="btn-secondary">
                     ← Volver a consultar
                 </a>
-
             </div>
+
         </div>
     </section>
 
