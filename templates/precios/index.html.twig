@@ -41,7 +41,7 @@
                                             step="0.5"
                                             data-precio="{{ prenda.precio }}"
                                             placeholder="m²"
-                                            oninput="if(this.value.length>2)this.value=this.value.slice(0,2);actualizarTotal()"
+                                            oninput="if(this.value.length>4)this.value=this.value.slice(0,4);actualizarTotal()"
                                         >
                                         <span class="m2-label">m²</span>
                                         <span class="alfombra-subtotal">0,00 €</span>
@@ -128,7 +128,7 @@ function añadirAlfombra(precio) {
     div.innerHTML = `
         <input type="number" class="qty-input qty-input-m2 alfombra-m2"
             value="" min="0" max="99" step="0.5" data-precio="${precio}"
-            placeholder="m²" oninput="if(this.value.length>2)this.value=this.value.slice(0,2);actualizarTotal()">
+            placeholder="m²" oninput="if(this.value.length>4)this.value=this.value.slice(0,4);actualizarTotal()">
         <span class="m2-label">m²</span>
         <span class="alfombra-subtotal">0,00 €</span>
         <button type="button" class="btn-remove-alfombra" onclick="eliminarAlfombra(this)">✕</button>
