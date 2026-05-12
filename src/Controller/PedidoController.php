@@ -29,17 +29,20 @@ class PedidoController extends AbstractController
             return $this->redirectToRoute('app_pedido');
         }
 
+        $request->getSession()->set('pedido_autorizado', $pedido->getId());
         return $this->redirectToRoute('app_pedido_resultado_show', ['id' => $pedido->getId()]);
     }
 
     #[Route('/pedido/resultado/{id}', name: 'app_pedido_resultado_show', methods: ['GET'])]
-    public function resultadoShow(int $id, PedidosRepository $pedidosRepository): Response
+    public function resultadoShow(int $id, Request $request, PedidosRepository $pedidosRepository): Response
     {
         $pedido = $pedidosRepository->find($id);
 
-        if (!$pedido) {
+        if (!$pedido || $request->getSession()->get('pedido_autorizado') !== $pedido->getId()) {
             return $this->redirectToRoute('app_pedido');
         }
+
+        $request->getSession()->remove('pedido_autorizado');
 
         return $this->render('pedido/resultado.html.twig', [
             'pedido' => $pedido,
