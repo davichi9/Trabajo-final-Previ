@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\TrabajadoresRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TrabajadoresRepository::class)]
@@ -30,6 +32,14 @@ class Trabajadores
 
     #[ORM\Column(length: 100)]
     private ?string $rol = null;
+
+    #[ORM\OneToMany(targetEntity: Pedidos::class, mappedBy: 'trabajador')]
+    private Collection $pedidosAsignados;
+
+    public function __construct()
+    {
+        $this->pedidosAsignados = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -104,6 +114,35 @@ class Trabajadores
     public function setRol(string $rol): static
     {
         $this->rol = $rol;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Pedidos>
+     */
+    public function getPedidosAsignados(): Collection
+    {
+        return $this->pedidosAsignados;
+    }
+
+    public function addPedidosAsignado(Pedidos $pedidosAsignado): static
+    {
+        if (!$this->pedidosAsignados->contains($pedidosAsignado)) {
+            $this->pedidosAsignados->add($pedidosAsignado);
+            $pedidosAsignado->setTrabajador($this);
+        }
+
+        return $this;
+    }
+
+    public function removePedidosAsignado(Pedidos $pedidosAsignado): static
+    {
+        if ($this->pedidosAsignados->removeElement($pedidosAsignado)) {
+            if ($pedidosAsignado->getTrabajador() === $this) {
+                $pedidosAsignado->setTrabajador(null);
+            }
+        }
 
         return $this;
     }
