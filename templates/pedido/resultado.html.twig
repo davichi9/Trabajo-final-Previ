@@ -32,6 +32,14 @@
                         <td>#{{ pedido.id }}</td>
                     </tr>
                     <tr>
+                        <th>Nombre del cliente</th>
+                        <td>{{ pedido.cliente.nombre }} {{ pedido.cliente.apellidos }}</td>
+                    </tr>
+                    <tr>
+                        <th>Teléfono del cliente</th>
+                        <td>{{ pedido.cliente.telefonoNumero }}</td>
+                    </tr>
+                    <tr>
                         <th>Contenido</th>
                         <td>{{ pedido.contenido }}</td>
                     </tr>
