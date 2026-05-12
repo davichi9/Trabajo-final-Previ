@@ -23,8 +23,10 @@
 
         <header class="site-header">
             <div class="header-left">
-                <i class="fas fa-shirt header-logo"></i>
-                <span class="header-brand">Tintorería Previ</span>
+                <a href="{{ path('app_home') }}" class="header-brand-link">
+                    <i class="fas fa-shirt header-logo"></i>
+                    <span class="header-brand">Tintorería Previ</span>
+                </a>
             </div>
             <nav class="header-nav">
                 <a href="{{ path('app_home') }}">Inicio</a>
