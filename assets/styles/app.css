@@ -197,15 +197,10 @@ a { color: inherit; text-decoration: none; }
 
 .ubicacion-grid a { color: #ff6a00; font-weight: 600; }
 
-.map-placeholder {
-    background: #f0f0f0;
-    border-radius: 12px;
-    height: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    color: #aaa;
+.map-container {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
 }
 
 /* ===== FORMULARIO PEDIDO ===== */
