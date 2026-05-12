@@ -1,0 +1,127 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Clientes - Lavandería{% endblock %}
+
+{% block body %}
+<div class="dashboard-container">
+    <nav class="dashboard-navbar">
+        <div class="dashboard-navbar-content">
+            <h2>Lavandería - Clientes</h2>
+            <div class="navbar-user">
+                <span>Bienvenido, {{ trabajador_name }} <span class="badge">{{ trabajador_role }}</span></span>
+                <form method="POST" action="{{ path('app_logout') }}" class="logout-form">
+                    <button type="submit" class="btn-logout">Cerrar Sesión</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-content">
+        <div class="content-header">
+            <h1>Lista de Clientes</h1>
+            <a href="{{ path('app_dashboard') }}" class="btn-secondary">Volver al Dashboard</a>
+        </div>
+
+        {% if clientes %}
+            <div class="clients-table-container">
+                <table class="clients-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Apellidos</th>
+                            <th>Teléfono</th>
+                            <th>Email</th>
+                            <th>Domicilio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cliente in clientes %}
+                            <tr>
+                                <td>{{ cliente.id }}</td>
+                                <td>{{ cliente.nombre }}</td>
+                                <td>{{ cliente.apellidos }}</td>
+                                <td>{{ cliente.telefonoNumero }}</td>
+                                <td>{{ cliente.email }}</td>
+                                <td>{{ cliente.domicilio }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>No hay clientes registrados.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .btn-secondary {
+        padding: 0.5rem 1rem;
+        background-color: #6c757d;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 0.95rem;
+        transition: background-color 0.3s;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+
+    .clients-table-container {
+        overflow-x: auto;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .clients-table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: white;
+    }
+
+    .clients-table thead {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .clients-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .clients-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .clients-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .clients-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
