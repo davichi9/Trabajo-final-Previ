@@ -37,10 +37,11 @@
                                             class="qty-input qty-input-m2 alfombra-m2"
                                             value=""
                                             min="0"
+                                            max="99"
                                             step="0.5"
                                             data-precio="{{ prenda.precio }}"
                                             placeholder="m²"
-                                            oninput="actualizarTotal()"
+                                            oninput="if(this.value.length>2)this.value=this.value.slice(0,2);actualizarTotal()"
                                         >
                                         <span class="m2-label">m²</span>
                                         <span class="alfombra-subtotal">0,00 €</span>
@@ -70,7 +71,7 @@
                                         class="qty-input"
                                         value="0"
                                         min="0"
-                                        max="25"
+                                        max="99"
                                         data-precio="{{ prenda.precio }}"
                                         data-nombre="{{ prenda.nombre }}"
                                         data-unidad="{{ prenda.unidad }}"
@@ -114,29 +115,34 @@ const PRECIO_ALFOMBRA = document.querySelector('.alfombra-m2') ? parseFloat(docu
 
 function cambiarCantidad(btn, delta) {
     const input = btn.parentElement.querySelector('.qty-input');
-    const nuevo = Math.max(0, Math.min(25, parseInt(input.value || 0) + delta));
+    const nuevo = Math.max(0, Math.min(99, parseInt(input.value || 0) + delta));
     input.value = nuevo;
     actualizarTotal();
 }
 
 function añadirAlfombra(precio) {
     const container = document.getElementById('alfombras-container');
+    if (container.querySelectorAll('.alfombra-entry').length >= 10) return;
     const div = document.createElement('div');
     div.className = 'alfombra-entry';
     div.innerHTML = `
         <input type="number" class="qty-input qty-input-m2 alfombra-m2"
-            value="" min="0" step="0.5" data-precio="${precio}"
-            placeholder="m²" oninput="actualizarTotal()">
+            value="" min="0" max="99" step="0.5" data-precio="${precio}"
+            placeholder="m²" oninput="if(this.value.length>2)this.value=this.value.slice(0,2);actualizarTotal()">
         <span class="m2-label">m²</span>
         <span class="alfombra-subtotal">0,00 €</span>
         <button type="button" class="btn-remove-alfombra" onclick="eliminarAlfombra(this)">✕</button>
     `;
     container.appendChild(div);
+    const btnAdd = document.querySelector('.btn-add-alfombra');
+    if (container.querySelectorAll('.alfombra-entry').length >= 10) btnAdd.disabled = true;
     actualizarTotal();
 }
 
 function eliminarAlfombra(btn) {
     btn.closest('.alfombra-entry').remove();
+    const btnAdd = document.querySelector('.btn-add-alfombra');
+    if (btnAdd) btnAdd.disabled = false;
     actualizarTotal();
 }
 
@@ -148,7 +154,7 @@ function actualizarTotal() {
     resumenLista.innerHTML = '';
 
     inputs.forEach(input => {
-        const qty = Math.min(25, Math.max(0, parseInt(input.value) || 0));
+        const qty = Math.min(99, Math.max(0, parseInt(input.value) || 0));
         const precio = parseFloat(input.dataset.precio);
         const subtotal = qty * precio;
         const nombre = input.dataset.nombre;
