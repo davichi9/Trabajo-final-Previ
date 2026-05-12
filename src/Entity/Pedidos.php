@@ -36,6 +36,10 @@ class Pedidos
     #[ORM\JoinColumn(nullable: false)]
     private ?Clientes $cliente = null;
 
+    #[ORM\ManyToOne(inversedBy: 'pedidosAsignados')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Trabajadores $trabajador = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -121,6 +125,18 @@ class Pedidos
     public function setCliente(?Clientes $cliente): static
     {
         $this->cliente = $cliente;
+
+        return $this;
+    }
+
+    public function getTrabajador(): ?Trabajadores
+    {
+        return $this->trabajador;
+    }
+
+    public function setTrabajador(?Trabajadores $trabajador): static
+    {
+        $this->trabajador = $trabajador;
 
         return $this;
     }

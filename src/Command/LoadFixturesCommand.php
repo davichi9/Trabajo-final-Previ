@@ -141,6 +141,9 @@ class LoadFixturesCommand extends Command
         $this->entityManager->flush();
         $output->writeln(' 3 trabajadores creados');
 
+        // Get trabajadores from database
+        $trabajadoresList = $this->entityManager->getRepository(Trabajadores::class)->findAll();
+
         // Crear pedidos
         $pedidos = [
             [
@@ -151,6 +154,7 @@ class LoadFixturesCommand extends Command
                 'precio' => 20.00,
                 'pagado' => false,
                 'cliente' => $clientesList[0],
+                'trabajador' => null,
             ],
             [
                 'estado' => 'terminado',
@@ -160,6 +164,7 @@ class LoadFixturesCommand extends Command
                 'precio' => 18.50,
                 'pagado' => true,
                 'cliente' => $clientesList[1],
+                'trabajador' => $trabajadoresList[1], // Elena
             ],
             [
                 'estado' => 'recogido',
@@ -169,6 +174,7 @@ class LoadFixturesCommand extends Command
                 'precio' => 20.00,
                 'pagado' => true,
                 'cliente' => $clientesList[2],
+                'trabajador' => $trabajadoresList[0], // Carlos
             ],
             [
                 'estado' => 'no terminado',
@@ -178,6 +184,7 @@ class LoadFixturesCommand extends Command
                 'precio' => 25.00,
                 'pagado' => false,
                 'cliente' => $clientesList[3],
+                'trabajador' => null,
             ],
             [
                 'estado' => 'terminado',
@@ -187,6 +194,7 @@ class LoadFixturesCommand extends Command
                 'precio' => 15.00,
                 'pagado' => true,
                 'cliente' => $clientesList[0],
+                'trabajador' => $trabajadoresList[2], // David
             ],
         ];
 
@@ -199,6 +207,7 @@ class LoadFixturesCommand extends Command
             $pe->setPrecio($pedido['precio']);
             $pe->setPagado($pedido['pagado']);
             $pe->setCliente($pedido['cliente']);
+            $pe->setTrabajador($pedido['trabajador']);
             $this->entityManager->persist($pe);
         }
         $this->entityManager->flush();
