@@ -40,6 +40,9 @@ class Pedidos
     #[ORM\JoinColumn(nullable: true)]
     private ?Trabajadores $trabajador = null;
 
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $observaciones = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -137,6 +140,18 @@ class Pedidos
     public function setTrabajador(?Trabajadores $trabajador): static
     {
         $this->trabajador = $trabajador;
+
+        return $this;
+    }
+
+    public function getObservaciones(): ?string
+    {
+        return $this->observaciones;
+    }
+
+    public function setObservaciones(?string $observaciones): static
+    {
+        $this->observaciones = $observaciones;
 
         return $this;
     }

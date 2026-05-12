@@ -64,6 +64,18 @@
                 </tbody>
             </table>
 
+            {% if pedido.observaciones %}
+            <div class="resultado-observaciones">
+                <h3>Observaciones</h3>
+                <p>{{ pedido.observaciones }}</p>
+            </div>
+            {% else %}
+            <div class="resultado-observaciones">
+                <h3>Observaciones</h3>
+                <p class="sin-observaciones">No hay observaciones sobre este pedido.</p>
+            </div>
+            {% endif %}
+
             <div class="resultado-footer">
                 <a href="{{ path('app_pedido') }}" class="btn-secondary">
                     ← Volver a consultar
