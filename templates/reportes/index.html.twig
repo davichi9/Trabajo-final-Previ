@@ -1,0 +1,234 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Reportes - Lavandería{% endblock %}
+
+{% block body %}
+<div class="reportes-container">
+    <nav class="dashboard-navbar">
+        <div class="dashboard-navbar-content">
+            <h2>Lavandería - Reportes</h2>
+            <div class="navbar-user">
+                <a href="{{ path('app_home') }}" class="btn-back">← Volver</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="reportes-content">
+        <div class="reportes-header">
+            <h1>Reportes de Ingresos</h1>
+            
+            <div class="month-selector">
+                <label for="monthInput">Selecciona un mes:</label>
+                <input 
+                    type="month" 
+                    id="monthInput" 
+                    value="{{ year }}-{{ '%02d'|format(month) }}"
+                    class="month-input"
+                >
+            </div>
+        </div>
+
+        <div class="reportes-grid">
+            <!-- Chart -->
+            <div class="reportes-chart-section">
+                <div class="chart-card">
+                    <h3>Ingresos Semanales</h3>
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .reportes-container {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        background: #f5f5f5;
+    }
+
+    .reportes-content {
+        flex: 1;
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .reportes-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .reportes-header h1 {
+        margin: 0;
+        color: #333;
+    }
+
+    .month-selector {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .month-selector label {
+        font-weight: 500;
+        color: #555;
+    }
+
+    .month-input {
+        padding: 0.5rem 1rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+
+    .reportes-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .reportes-chart-section {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .chart-card {
+        height: 100%;
+    }
+
+    .chart-card h3 {
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        color: #333;
+    }
+
+    #revenueChart {
+        max-height: 500px;
+    }
+
+    .btn-back {
+        padding: 0.5rem 1rem;
+        background: #6c757d;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background 0.3s;
+    }
+
+    .btn-back:hover {
+        background: #5a6268;
+    }
+
+    @media (max-width: 1024px) {
+        .reportes-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .reportes-header h1 {
+            width: 100%;
+        }
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<script>
+    const chartLabels = {{ chartLabels|raw }};
+    const chartData = {{ chartData|raw }};
+    const yMin = {{ yMin }};
+    const yMax = {{ yMax }};
+    const currentMonth = '{{ currentMonth }}';
+
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    const revenueChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                label: 'Ingresos',
+                data: chartData,
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointBackgroundColor: '#007bff',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointHoverRadius: 7,
+                pointHoverBackgroundColor: '#0056b3'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        boxWidth: 12,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    padding: 10,
+                    titleFont: {
+                        size: 13
+                    },
+                    bodyFont: {
+                        size: 12
+                    },
+                    callbacks: {
+                        label: function(context) {
+                            return 'Ingresos: €' + context.parsed.y.toFixed(2);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: yMin,
+                    max: yMax,
+                    ticks: {
+                        callback: function(value) {
+                            return '€' + value.toFixed(2);
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Ingresos (€)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Semanas'
+                    }
+                }
+            }
+        }
+    });
+
+    // Handle month change
+    document.getElementById('monthInput').addEventListener('change', function(e) {
+        const [year, month] = e.target.value.split('-');
+        window.location.href = `{{ path('app_reportes') }}?year=${year}&month=${month}`;
+    });
+</script>
+{% endblock %}

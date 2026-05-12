@@ -144,59 +144,187 @@ class LoadFixturesCommand extends Command
         // Get trabajadores from database
         $trabajadoresList = $this->entityManager->getRepository(Trabajadores::class)->findAll();
 
-        // Crear pedidos
-        $pedidos = [
-            [
-                'estado' => 'no terminado',
-                'contenido' => 'Lavado normal: 3 camisas, 2 pantalones',
-                'fecha_entrada' => new DateTime('2026-05-04'),
-                'fecha_salida' => null,
-                'precio' => 20.00,
-                'pagado' => false,
-                'cliente' => $clientesList[0],
-                'trabajador' => null,
-            ],
-            [
-                'estado' => 'terminado',
-                'contenido' => 'Lavado delicado: vestido de seda, ropa interior',
-                'fecha_entrada' => new DateTime('2026-04-30'),
-                'fecha_salida' => new DateTime('2026-05-03'),
-                'precio' => 18.50,
-                'pagado' => true,
-                'cliente' => $clientesList[1],
-                'trabajador' => $trabajadoresList[1], // Elena
-            ],
-            [
-                'estado' => 'recogido',
-                'contenido' => 'Lavado en seco: abrigo de lana, quitar manchas',
-                'fecha_entrada' => new DateTime('2026-04-25'),
-                'fecha_salida' => new DateTime('2026-04-28'),
-                'precio' => 20.00,
-                'pagado' => true,
-                'cliente' => $clientesList[2],
-                'trabajador' => $trabajadoresList[0], // Carlos
-            ],
-            [
-                'estado' => 'no terminado',
-                'contenido' => 'Quitar manchas: chaqueta de cuero, planchado',
-                'fecha_entrada' => new DateTime('2026-05-02'),
-                'fecha_salida' => null,
-                'precio' => 25.00,
-                'pagado' => false,
-                'cliente' => $clientesList[3],
-                'trabajador' => null,
-            ],
-            [
-                'estado' => 'terminado',
-                'contenido' => 'Lavado normal: sábanas, toallas, mantel',
-                'fecha_entrada' => new DateTime('2026-04-29'),
-                'fecha_salida' => new DateTime('2026-05-01'),
-                'precio' => 15.00,
-                'pagado' => true,
-                'cliente' => $clientesList[0],
-                'trabajador' => $trabajadoresList[2], // David
-            ],
+        // Crear muchos pedidos para testing de reportes
+        $pedidos = [];
+        $contents = [
+            'Lavado normal: 3 camisas, 2 pantalones',
+            'Lavado delicado: vestido de seda, ropa interior',
+            'Lavado en seco: abrigo de lana, quitar manchas',
+            'Quitar manchas: chaqueta de cuero, planchado',
+            'Lavado normal: sábanas, toallas, mantel',
+            'Planchado express: 5 camisas de trabajo',
+            'Limpieza profunda: edredón, almohadas',
+            'Lavado especial: ropa deportiva, zapatos',
+            'Tintorería: pantalón formal, corbata',
+            'Lavado a mano: prendas delicadas, encaje',
         ];
+
+        // FEBRUARY 2026 data (4 weeks)
+        $feb_weeks = [
+            [1, 7],     // Week 1: Feb 1-7
+            [8, 14],    // Week 2: Feb 8-14
+            [15, 21],   // Week 3: Feb 15-21
+            [22, 28],   // Week 4: Feb 22-28
+        ];
+        
+        $idx = 0;
+        foreach ($feb_weeks as $week) {
+            for ($i = 0; $i < 5; $i++) {
+                $day = $week[0] + ($i % 7);
+                if ($day > $week[1]) $day = $week[1];
+                $salida_day = min($day + 1, $week[1]);
+                $pedidos[] = [
+                    'estado' => 'recogido',
+                    'contenido' => $contents[($idx + $i) % count($contents)],
+                    'fecha_entrada' => new DateTime('2026-02-' . str_pad($day, 2, '0', STR_PAD_LEFT)),
+                    'fecha_salida' => new DateTime('2026-02-' . str_pad($salida_day, 2, '0', STR_PAD_LEFT)),
+                    'precio' => 12 + rand(0, 20),
+                    'pagado' => true,
+                    'cliente' => $clientesList[rand(0, 3)],
+                    'trabajador' => $trabajadoresList[rand(0, 2)],
+                ];
+            }
+            $idx += 5;
+        }
+
+        // MARCH 2026 data (4 weeks + partial)
+        $mar_weeks = [
+            [1, 7],     // Week 1: Mar 1-7
+            [8, 14],    // Week 2: Mar 8-14
+            [15, 21],   // Week 3: Mar 15-21
+            [22, 28],   // Week 4: Mar 22-28
+            [29, 31],   // Week 5: Mar 29-31
+        ];
+        
+        $idx = 0;
+        foreach ($mar_weeks as $week) {
+            for ($i = 0; $i < 6; $i++) {
+                $day = $week[0] + ($i % 7);
+                if ($day > $week[1]) $day = $week[1];
+                $salida_day = min($day + 1, $week[1]);
+                $pedidos[] = [
+                    'estado' => 'recogido',
+                    'contenido' => $contents[($idx + $i) % count($contents)],
+                    'fecha_entrada' => new DateTime('2026-03-' . str_pad($day, 2, '0', STR_PAD_LEFT)),
+                    'fecha_salida' => new DateTime('2026-03-' . str_pad($salida_day, 2, '0', STR_PAD_LEFT)),
+                    'precio' => 14 + rand(0, 22),
+                    'pagado' => true,
+                    'cliente' => $clientesList[rand(0, 3)],
+                    'trabajador' => $trabajadoresList[rand(0, 2)],
+                ];
+            }
+            $idx += 6;
+        }
+
+        // APRIL 2026 data (4 weeks)
+        $apr_weeks = [
+            [1, 7],     // Week 1: Apr 1-7
+            [8, 14],    // Week 2: Apr 8-14
+            [15, 21],   // Week 3: Apr 15-21
+            [22, 28],   // Week 4: Apr 22-28
+            [29, 30],   // Week 5: Apr 29-30
+        ];
+        
+        $idx = 0;
+        foreach ($apr_weeks as $week) {
+            for ($i = 0; $i < 5; $i++) {
+                $day = $week[0] + ($i % 7);
+                if ($day > $week[1]) $day = $week[1];
+                $salida_day = min($day + 1, $week[1]);
+                $pedidos[] = [
+                    'estado' => 'recogido',
+                    'contenido' => $contents[($idx + $i) % count($contents)],
+                    'fecha_entrada' => new DateTime('2026-04-' . str_pad($day, 2, '0', STR_PAD_LEFT)),
+                    'fecha_salida' => new DateTime('2026-04-' . str_pad($salida_day, 2, '0', STR_PAD_LEFT)),
+                    'precio' => 13 + rand(0, 25),
+                    'pagado' => true,
+                    'cliente' => $clientesList[rand(0, 3)],
+                    'trabajador' => $trabajadoresList[rand(0, 2)],
+                ];
+            }
+            $idx += 5;
+        }
+
+        // MAY 2026 data - Proper weekly alignment
+        // Week 1 (May 1-7)
+        for ($i = 0; $i < 8; $i++) {
+            $day = 1 + ($i % 7);
+            $salida_day = min($day + 1 + ($i % 2), 7);
+            $pedidos[] = [
+                'estado' => 'recogido',
+                'contenido' => $contents[$i % count($contents)],
+                'fecha_entrada' => new DateTime('2026-05-' . str_pad($day, 2, '0', STR_PAD_LEFT)),
+                'fecha_salida' => new DateTime('2026-05-' . str_pad($salida_day, 2, '0', STR_PAD_LEFT)),
+                'precio' => 15 + rand(0, 20),
+                'pagado' => true,
+                'cliente' => $clientesList[rand(0, 3)],
+                'trabajador' => $trabajadoresList[rand(0, 2)],
+            ];
+        }
+
+        // Week 2 (May 8-14)
+        for ($i = 0; $i < 12; $i++) {
+            $day = 8 + ($i % 7);
+            $salida_day = min($day + 1 + ($i % 2), 14);
+            $pedidos[] = [
+                'estado' => 'recogido',
+                'contenido' => $contents[($i + 2) % count($contents)],
+                'fecha_entrada' => new DateTime('2026-05-' . str_pad($day, 2, '0', STR_PAD_LEFT)),
+                'fecha_salida' => new DateTime('2026-05-' . str_pad($salida_day, 2, '0', STR_PAD_LEFT)),
+                'precio' => 12 + rand(0, 25),
+                'pagado' => true,
+                'cliente' => $clientesList[rand(0, 3)],
+                'trabajador' => $trabajadoresList[rand(0, 2)],
+            ];
+        }
+
+        // Week 3 (May 15-21)
+        for ($i = 0; $i < 15; $i++) {
+            $day = 15 + ($i % 7);
+            $salida_day = min($day + 1 + ($i % 2), 21);
+            $pedidos[] = [
+                'estado' => 'recogido',
+                'contenido' => $contents[($i + 4) % count($contents)],
+                'fecha_entrada' => new DateTime('2026-05-' . str_pad($day, 2, '0', STR_PAD_LEFT)),
+                'fecha_salida' => new DateTime('2026-05-' . str_pad($salida_day, 2, '0', STR_PAD_LEFT)),
+                'precio' => 18 + rand(0, 22),
+                'pagado' => true,
+                'cliente' => $clientesList[rand(0, 3)],
+                'trabajador' => $trabajadoresList[rand(0, 2)],
+            ];
+        }
+
+        // Week 4 (May 22-28)
+        for ($i = 0; $i < 14; $i++) {
+            $day = 22 + ($i % 7);
+            $salida_day = min($day + 1 + ($i % 2), 28);
+            $pedidos[] = [
+                'estado' => 'recogido',
+                'contenido' => $contents[($i + 6) % count($contents)],
+                'fecha_entrada' => new DateTime('2026-05-' . str_pad($day, 2, '0', STR_PAD_LEFT)),
+                'fecha_salida' => new DateTime('2026-05-' . str_pad($salida_day, 2, '0', STR_PAD_LEFT)),
+                'precio' => 14 + rand(0, 28),
+                'pagado' => true,
+                'cliente' => $clientesList[rand(0, 3)],
+                'trabajador' => $trabajadoresList[rand(0, 2)],
+            ];
+        }
+
+        // Week 5 (May 29-31)
+        for ($i = 0; $i < 9; $i++) {
+            $day = 29 + ($i % 3);
+            $salida_day = min($day + 1, 31);
+            $pedidos[] = [
+                'estado' => 'recogido',
+                'contenido' => $contents[($i + 8) % count($contents)],
+                'fecha_entrada' => new DateTime('2026-05-' . str_pad($day, 2, '0', STR_PAD_LEFT)),
+                'fecha_salida' => new DateTime('2026-05-' . str_pad($salida_day, 2, '0', STR_PAD_LEFT)),
+                'precio' => 16 + rand(0, 24),
+                'pagado' => true,
+                'cliente' => $clientesList[rand(0, 3)],
+                'trabajador' => $trabajadoresList[rand(0, 2)],
+            ];
+        }
 
         foreach ($pedidos as $pedido) {
             $pe = new Pedidos();
@@ -211,7 +339,7 @@ class LoadFixturesCommand extends Command
             $this->entityManager->persist($pe);
         }
         $this->entityManager->flush();
-        $output->writeln(' 5 pedidos creados');
+        $output->writeln(' ' . count($pedidos) . ' pedidos creados');
 
         $output->writeln('');
         $output->writeln('<info> Datos de prueba cargados exitosamente!</info>');
