@@ -22,10 +22,25 @@ class PedidoController extends AbstractController
         $numeroPedido = $request->request->get('numeroPedido');
         $telefono = $request->request->get('telefono');
 
-        $pedido = $pedidosRepository->findOneBy(['id' => $numeroPedido]);
+        if (empty($numeroPedido) || empty($telefono)) {
+            $this->addFlash('error', 'Por favor, rellena todos los campos antes de continuar.');
+            return $this->redirectToRoute('app_pedido');
+        }
 
-        if (!$pedido || $pedido->getCliente()->getTelefonoNumero() !== $telefono) {
-            $this->addFlash('error', 'No se encontró ningún pedido con ese número y teléfono.');
+        try {
+            $pedido = $pedidosRepository->findOneBy(['id' => $numeroPedido]);
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Error de servidor. Inténtalo de nuevo más tarde.');
+            return $this->redirectToRoute('app_pedido');
+        }
+
+        if (!$pedido) {
+            $this->addFlash('error', 'No existe ningún pedido con ese número.');
+            return $this->redirectToRoute('app_pedido');
+        }
+
+        if ($pedido->getCliente()->getTelefonoNumero() !== $telefono) {
+            $this->addFlash('error', 'El número de teléfono no coincide con el pedido.');
             return $this->redirectToRoute('app_pedido');
         }
 
