@@ -257,17 +257,24 @@
                 }
             }
         });
-
-        // Handle month change
-        document.getElementById('monthInput').addEventListener('change', function(e) {
-            const [year, month] = e.target.value.split('-');
-            window.location.href = `{{ path('app_reportes') }}?year=${year}&month=${month}`;
-        });
     }
 
-    // Wait for Chart.js to be loaded before initializing
+    // Setup month change listener (works regardless of data availability)
+    function setupMonthListener() {
+        const monthInput = document.getElementById('monthInput');
+        if (monthInput) {
+            monthInput.addEventListener('change', function(e) {
+                const [year, month] = e.target.value.split('-');
+                window.location.href = `{{ path('app_reportes') }}?year=${year}&month=${month}`;
+            });
+        }
+    }
+
+    // Wait for Chart.js to be loaded before initializing chart
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
+            setupMonthListener();
+            
             // Wait for Chart.js library to be available
             let attempts = 0;
             const checkAndInit = setInterval(function() {
@@ -282,6 +289,8 @@
         });
     } else {
         // DOM already loaded
+        setupMonthListener();
+        
         let attempts = 0;
         const checkAndInit = setInterval(function() {
             if (typeof Chart !== 'undefined') {
