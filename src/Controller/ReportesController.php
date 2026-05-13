@@ -40,8 +40,9 @@ class ReportesController extends AbstractController
         // Calculate dynamic min/max for Y-axis (50% margin)
         $yMax = 0;
         $yMin = 0;
+        $hasData = !empty($chartData);
         
-        if (!empty($chartData)) {
+        if ($hasData) {
             $maxRevenue = max($chartData);
             $minRevenue = min($chartData);
             
@@ -56,6 +57,7 @@ class ReportesController extends AbstractController
             'chartData' => json_encode($chartData),
             'yMin' => $yMin,
             'yMax' => $yMax,
+            'hasData' => $hasData,
             'currentMonth' => $now->format('Y-m'),
         ]);
     }
