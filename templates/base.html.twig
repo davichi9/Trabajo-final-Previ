@@ -44,6 +44,7 @@
         </main>
 
         <footer class="site-footer" id="contacto">
+            {% block footer %}
             <div class="footer-grid">
                 <div class="footer-col">
                     <h4>📞 Teléfono</h4>
@@ -65,6 +66,7 @@
                 </div>
             </div>
             <p class="footer-copy">&copy; {{ "now"|date("Y") }} Tintorería Previ. Todos los derechos reservados.</p>
+            {% endblock %}
         </footer>
 
     </body>
