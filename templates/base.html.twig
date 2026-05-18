@@ -43,6 +43,7 @@
             {% block body %}{% endblock %}
         </main>
 
+        {% block footer %}
         <footer class="site-footer" id="contacto">
             <div class="footer-grid">
                 <div class="footer-col">
@@ -66,6 +67,7 @@
             </div>
             <p class="footer-copy">&copy; {{ "now"|date("Y") }} Tintorería Previ. Todos los derechos reservados.</p>
         </footer>
+        {% endblock %}
 
     </body>
 </html>
