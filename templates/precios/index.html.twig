@@ -101,7 +101,10 @@
                     <span id="totalGlobal">0,00 €</span>
                 </div>
                 <p class="resumen-aviso">* Los precios marcados con "desde" pueden variar según el estado y tipo de prenda.</p>
-                <a href="tel:+34630233032" class="btn-primary btn-block" style="margin-top:1.2rem;">
+                <button type="button" class="btn-reset" onclick="reiniciarCalculadora()">
+                    <i class="fas fa-rotate-left"></i> Reiniciar
+                </button>
+                <a href="tel:+34630233032" class="btn-primary btn-block" style="margin-top:0.6rem;">
                     <i class="fas fa-phone"></i> Llamar para confirmar
                 </a>
             </aside>
@@ -112,6 +115,36 @@
 
 <script>
 const PRECIO_ALFOMBRA = document.querySelector('.alfombra-m2') ? parseFloat(document.querySelector('.alfombra-m2').dataset.precio) : 12;
+
+function reiniciarCalculadora() {
+    // Prendas normales
+    document.querySelectorAll('.qty-input:not(.alfombra-m2)').forEach(input => { input.value = 0; });
+    // Alfombras: dejar solo la primera y vaciarla
+    const container = document.getElementById('alfombras-container');
+    const entradas = container.querySelectorAll('.alfombra-entry');
+    entradas.forEach((entry, i) => {
+        if (i === 0) entry.querySelector('.alfombra-m2').value = '';
+        else entry.remove();
+    });
+    const btnAdd = document.querySelector('.btn-add-alfombra');
+    if (btnAdd) btnAdd.disabled = false;
+    actualizarTotal();
+}
+
+function reiniciarCalculadora() {
+    // Prendas normales
+    document.querySelectorAll('.qty-input:not(.alfombra-m2)').forEach(input => { input.value = 0; });
+    // Alfombras: dejar solo la primera y vaciarla
+    const container = document.getElementById('alfombras-container');
+    const entradas = container.querySelectorAll('.alfombra-entry');
+    entradas.forEach((entry, i) => {
+        if (i === 0) entry.querySelector('.alfombra-m2').value = '';
+        else entry.remove();
+    });
+    const btnAdd = document.querySelector('.btn-add-alfombra');
+    if (btnAdd) btnAdd.disabled = false;
+    actualizarTotal();
+}
 
 function cambiarCantidad(btn, delta) {
     const input = btn.parentElement.querySelector('.qty-input');
