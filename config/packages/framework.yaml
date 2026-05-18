@@ -2,8 +2,9 @@
 framework:
     secret: '%env(APP_SECRET)%'
 
-    # Note that the session will be started ONLY if you read or write from it.
-    session: true
+    session:
+        cookie_lifetime: 0      # La cookie muere al cerrar el navegador
+        gc_maxlifetime: 3600    # La sesión en servidor caduca tras 1h de inactividad
 
     #esi: true
     #fragments: true
