@@ -22,6 +22,9 @@ cd Trabajo-final-Previ
 ```bash
 composer install
 ```
+```bash
+composer require symfony/google-mailer
+```
 
 ### 3. Configurar la base de datos
 
@@ -51,7 +54,7 @@ Si estás usando XAMPP, asegúrate de que MySQL esté ejecutándose.
    
 | Nombre | Email | Contraseña | Rol |
 |--------|-------|------------|-----|
-| Carlos Hernández | carlos.hernandez@empresa.com | password123 | admin |
+| Carlos Hernández | carlos.hernandez@empresa.com | password123 | supervisor |
 | Elena Fernández | elena.fernandez@empresa.com | password123 | supervisor |
 | David Jiménez | david.jimenez@empresa.com | password123 | worker |
 
