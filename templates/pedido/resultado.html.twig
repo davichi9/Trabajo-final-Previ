@@ -61,6 +61,10 @@
                         <th>Pagado</th>
                         <td class="{{ pedido.pagado ? 'pagado-si' : 'pagado-no' }}">{{ pedido.pagado ? 'Sí' : 'No' }}</td>
                     </tr>
+                    <tr>
+                        <th>Gestionado por</th>
+                        <td>{{ pedido.trabajador ? pedido.trabajador.nombre ~ ' ' ~ pedido.trabajador.apellidos : 'No asignado' }}</td>
+                    </tr>
                 </tbody>
             </table>
 
