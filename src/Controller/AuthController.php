@@ -20,7 +20,10 @@ class AuthController extends AbstractController
             return $this->redirectToRoute('app_dashboard');
         }
 
-        $error = null;
+        $error = $session->get('login_error');
+        $email = $session->get('login_email');
+        $session->remove('login_error');
+        $session->remove('login_email');
 
         if ($request->isMethod('POST')) {
             $email = $request->request->get('email');
@@ -32,19 +35,21 @@ class AuthController extends AbstractController
             // Verify password
             if ($trabajador && password_verify($password, $trabajador->getContraseña())) {
                 // Login successful - set session
-                $session = $request->getSession();
                 $session->set('trabajador_id', $trabajador->getId());
                 $session->set('trabajador_name', $trabajador->getNombre());
                 $session->set('trabajador_role', $trabajador->getRol());
 
                 return $this->redirectToRoute('app_dashboard');
             } else {
-                $error = 'Email o contraseña inválidos';
+                $session->set('login_error', 'Email o contraseña inválidos');
+                $session->set('login_email', $email);
+                return $this->redirectToRoute('app_login');
             }
         }
 
         return $this->render('auth/login.html.twig', [
             'error' => $error,
+            'email' => $email,
         ]);
     }
 
