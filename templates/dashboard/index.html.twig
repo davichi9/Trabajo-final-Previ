@@ -32,13 +32,7 @@
                 <a href="{{ path('app_clientes_list') }}" class="btn-primary">Ver Clientes</a>
             </div>
 
-            <div class="dashboard-card">
-                <h3>Servicios</h3>
-                <p>Gestiona los servicios de lavandería</p>
-                <a href="#" class="btn-primary">Ver Servicios</a>
-            </div>
-
-            {% if trabajador_role == 'admin' or trabajador_role == 'supervisor' %}
+            {% if trabajador_role == 'supervisor' %}
             <div class="dashboard-card">
                 <h3>Empleados</h3>
                 <p>Administra el personal</p>
@@ -51,15 +45,9 @@
                 <a href="{{ path('app_reportes') }}" class="btn-primary">Ver Reportes</a>
             </div>
             {% endif %}
-
-            {% if trabajador_role == 'admin' %}
-            <div class="dashboard-card">
-                <h3>Configuración</h3>
-                <p>Ajustes del sistema</p>
-                <a href="#" class="btn-primary">Configurar</a>
-            </div>
-            {% endif %}
         </div>
     </div>
 </div>
 {% endblock %}
+
+{% block footer %}{% endblock %}
