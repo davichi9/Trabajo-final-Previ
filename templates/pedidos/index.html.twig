@@ -21,6 +21,57 @@
             <h1>Lista de pedidos</h1>
             <a href="{{ path('app_dashboard') }}" class="btn-secondary">Volver al Dashboard</a>
         </div>
+
+        <div class="search-box-container">
+            <form method="GET" action="{{ path('app_pedidos_list') }}" class="search-form">
+                <input
+                    type="text"
+                    name="search"
+                    class="search-input"
+                    placeholder="Buscar por ID, estado, contenido, cliente o teléfono..."
+                    value="{{ searchTerm }}"
+                >
+                <button type="submit" class="btn-search">Buscar</button>
+                {% if searchTerm %}
+                    <a href="{{ path('app_pedidos_list') }}" class="btn-clear">Limpiar</a>
+                {% endif %}
+            </form>
+        </div>
+
+        {% if pedidos %}
+            <div class="clients-table-container">
+                <table class="clients-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Cliente</th>
+                            <th>Teléfono</th>
+                            <th>Estado</th>
+                            <th>Fecha entrada</th>
+                            <th>Precio</th>
+                            <th>Pagado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pedido in pedidos %}
+                            <tr>
+                                <td>#{{ pedido.id }}</td>
+                                <td>{{ pedido.cliente.nombre }} {{ pedido.cliente.apellidos }}</td>
+                                <td>{{ pedido.cliente.telefonoNumero }}</td>
+                                <td>{{ pedido.estado }}</td>
+                                <td>{{ pedido.fechaEntrada|date('d/m/Y') }}</td>
+                                <td>{{ pedido.precio|number_format(2, ',', '.') }} €</td>
+                                <td>{{ pedido.pagado ? 'Sí' : 'No' }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>No hay pedidos registrados.</p>
+            </div>
+        {% endif %}
     </div>
 </div>
 
@@ -30,6 +81,62 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 2rem;
+    }
+
+    .search-box-container {
+        margin-bottom: 2rem;
+    }
+
+    .search-form {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .search-input {
+        flex: 1;
+        min-width: 250px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        font-size: 0.95rem;
+        transition: border-color 0.3s;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    .btn-search {
+        padding: 0.75rem 1.5rem;
+        background-color: #ff6a00;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .btn-search:hover {
+        background-color: #e55a00;
+    }
+
+    .btn-clear {
+        padding: 0.75rem 1.5rem;
+        background-color: #6c757d;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 0.95rem;
+        transition: background-color 0.3s;
+        display: inline-block;
+    }
+
+    .btn-clear:hover {
+        background-color: #5a6268;
     }
 
     .btn-secondary {
@@ -44,6 +151,51 @@
 
     .btn-secondary:hover {
         background-color: #5a6268;
+    }
+
+    .clients-table-container {
+        overflow-x: auto;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .clients-table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: white;
+    }
+
+    .clients-table thead {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .clients-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .clients-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .clients-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .clients-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        color: #6c757d;
     }
 </style>
 {% endblock %}

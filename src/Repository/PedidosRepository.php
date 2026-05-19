@@ -22,6 +22,22 @@ class PedidosRepository extends ServiceEntityRepository
         parent::__construct($registry, Pedidos::class);
     }
 
+    public function searchPedidos(?string $searchTerm): array
+    {
+        if (!$searchTerm) {
+            return $this->findAll();
+        }
+
+        $qb = $this->createQueryBuilder('p')
+            ->join('p.cliente', 'c')
+            ->where(
+                'p.id LIKE :s OR p.estado LIKE :s OR p.contenido LIKE :s OR c.nombre LIKE :s OR c.apellidos LIKE :s OR c.telefonoNumero LIKE :s'
+            )
+            ->setParameter('s', '%' . $searchTerm . '%');
+
+        return $qb->getQuery()->getResult();
+    }
+
     /**
      * Get revenue grouped by week for a given month
      */
