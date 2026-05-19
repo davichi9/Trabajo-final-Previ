@@ -97,6 +97,12 @@
                     <a href="{{ path('app_trabajadores_list') }}" class="btn-secondary">Cancelar</a>
                 </div>
             </form>
+
+            {% if trabajador.id != current_trabajador_id %}
+            <form method="POST" action="{{ path('app_trabajadores_delete', {id: trabajador.id}) }}" style="margin-top: 2rem;">
+                <button type="submit" class="btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar este trabajador? Esta acción no se puede deshacer.');">Eliminar Trabajador</button>
+            </form>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -219,5 +225,21 @@
     .btn-secondary:hover {
         background-color: #5a6268;
     }
+
+    .btn-danger {
+        padding: 0.75rem 1.5rem;
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
 </style>
 {% endblock %}
+
+{% block footer %}{% endblock %}

@@ -207,4 +207,42 @@ class TrabajadoresController extends AbstractController
             'current_trabajador_id' => $trabajador_id,
         ]);
     }
+
+    #[Route('/trabajadores/{id}/eliminar', name: 'app_trabajadores_delete', methods: ['POST'])]
+    public function delete(Request $request, int $id, TrabajadoresRepository $trabajadoresRepo, EntityManagerInterface $entityManager): Response
+    {
+        $session = $request->getSession();
+        $trabajador_id = $session->get('trabajador_id');
+
+        // Redirect to login if not authenticated
+        if (!$trabajador_id) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        // Check if user is supervisor
+        $trabajador_role = $session->get('trabajador_role');
+        if ($trabajador_role !== 'supervisor') {
+            return $this->redirectToRoute('app_dashboard');
+        }
+
+        // Prevent self-deletion
+        if ($id == $trabajador_id) {
+            $this->addFlash('error', 'No puedes eliminar tu propia cuenta.');
+            return $this->redirectToRoute('app_trabajadores_edit', ['id' => $id]);
+        }
+
+        // Get the trabajador to delete
+        $trabajador = $trabajadoresRepo->find($id);
+        if (!$trabajador) {
+            $this->addFlash('error', 'Trabajador no encontrado.');
+            return $this->redirectToRoute('app_trabajadores_list');
+        }
+
+        // Delete the trabajador
+        $entityManager->remove($trabajador);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Trabajador eliminado exitosamente.');
+        return $this->redirectToRoute('app_trabajadores_list');
+    }
 }
