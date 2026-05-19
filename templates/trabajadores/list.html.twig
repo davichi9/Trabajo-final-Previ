@@ -1,0 +1,217 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Trabajadores - Lavandería{% endblock %}
+
+{% block body %}
+<div class="dashboard-container">
+    <nav class="dashboard-navbar">
+        <div class="dashboard-navbar-content">
+            <h2>Lavandería - Trabajadores</h2>
+            <div class="navbar-user">
+                <span>Bienvenido, {{ trabajador_name }} <span class="badge">{{ trabajador_role }}</span></span>
+                <form method="POST" action="{{ path('app_logout') }}" class="logout-form">
+                    <button type="submit" class="btn-logout">Cerrar Sesión</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-content">
+        <div class="content-header">
+            <h1>Lista de Trabajadores</h1>
+            <a href="{{ path('app_dashboard') }}" class="btn-secondary">Volver al Dashboard</a>
+        </div>
+
+        <div class="search-box-container">
+            <form method="GET" action="{{ path('app_trabajadores_list') }}" class="search-form">
+                <input 
+                    type="text" 
+                    name="search" 
+                    class="search-input" 
+                    placeholder="Buscar por ID, nombre, apellido, teléfono, email o rol..."
+                    value="{{ searchTerm }}"
+                >
+                <button type="submit" class="btn-search">Buscar</button>
+                {% if searchTerm %}
+                    <a href="{{ path('app_trabajadores_list') }}" class="btn-clear">Limpiar</a>
+                {% endif %}
+            </form>
+        </div>
+
+        {% if trabajadores %}
+            <div class="clients-table-container">
+                <table class="clients-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Apellidos</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for trabajador in trabajadores %}
+                            <tr>
+                                <td>{{ trabajador.id }}</td>
+                                <td>{{ trabajador.nombre }}</td>
+                                <td>{{ trabajador.apellidos }}</td>
+                                <td>{{ trabajador.rol }}</td>
+                                <td>
+                                    {% if trabajador.isActivo() %}
+                                        <span class="badge badge-active">Activo</span>
+                                    {% else %}
+                                        <span class="badge badge-inactive">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>No hay trabajadores registrados.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .search-box-container {
+        margin-bottom: 2rem;
+    }
+
+    .search-form {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .search-input {
+        flex: 1;
+        min-width: 250px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        font-size: 0.95rem;
+    }
+
+    .btn-search {
+        padding: 0.75rem 1.5rem;
+        background-color: #ff9800;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+
+    .btn-search:hover {
+        background-color: #e68900;
+    }
+
+    .btn-clear {
+        padding: 0.75rem 1rem;
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+        display: inline-block;
+    }
+
+    .btn-clear:hover {
+        background-color: #5a6268;
+    }
+
+    .btn-secondary {
+        padding: 0.75rem 1.5rem;
+        background-color: #6c757d;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        cursor: pointer;
+        border: none;
+        font-size: 0.95rem;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+
+    .clients-table-container {
+        overflow-x: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+    }
+
+    .clients-table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: white;
+    }
+
+    .clients-table thead {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .clients-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .clients-table tbody tr {
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .clients-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .clients-table td {
+        padding: 1rem;
+        color: #212529;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .badge-active {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .badge-inactive {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .empty-state {
+        padding: 2rem;
+        text-align: center;
+        color: #6c757d;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block footer %}{% endblock %}
