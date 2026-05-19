@@ -34,6 +34,13 @@ class AuthController extends AbstractController
 
             // Verify password
             if ($trabajador && password_verify($password, $trabajador->getContraseña())) {
+                // Check if trabajador is active
+                if (!$trabajador->isActivo()) {
+                    $session->set('login_error', 'Tu cuenta ha sido desactivada. Contacta con administración.');
+                    $session->set('login_email', $email);
+                    return $this->redirectToRoute('app_login');
+                }
+
                 // Login successful - set session
                 $session->set('trabajador_id', $trabajador->getId());
                 $session->set('trabajador_name', $trabajador->getNombre());

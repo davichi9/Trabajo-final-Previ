@@ -33,6 +33,9 @@ class Trabajadores
     #[ORM\Column(length: 100)]
     private ?string $rol = null;
 
+    #[ORM\Column(type: 'boolean')]
+    private bool $activo = true;
+
     #[ORM\OneToMany(targetEntity: Pedidos::class, mappedBy: 'trabajador')]
     private Collection $pedidosAsignados;
 
@@ -114,6 +117,18 @@ class Trabajadores
     public function setRol(string $rol): static
     {
         $this->rol = $rol;
+
+        return $this;
+    }
+
+    public function isActivo(): bool
+    {
+        return $this->activo;
+    }
+
+    public function setActivo(bool $activo): static
+    {
+        $this->activo = $activo;
 
         return $this;
     }
