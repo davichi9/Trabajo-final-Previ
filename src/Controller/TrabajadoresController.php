@@ -151,13 +151,28 @@ class TrabajadoresController extends AbstractController
             $password = $request->request->get('password');
             $activo = $request->request->get('activo');
 
-            // Validate required fields
-            if (!$nombre || !$apellidos || !$email || !$rol || $activo === '') {
+            // Check if user is trying to change their own role
+            $isOwnAccount = ($id == $trabajador_id);
+            
+            // Validate required fields (role not required if editing own account)
+            if (!$nombre || !$apellidos || !$email || $activo === '') {
                 $this->addFlash('error', 'Por favor completa todos los campos requeridos.');
                 return $this->render('trabajadores/edit.html.twig', [
                     'trabajador' => $trabajador,
                     'trabajador_name' => $session->get('trabajador_name'),
                     'trabajador_role' => $session->get('trabajador_role'),
+                    'current_trabajador_id' => $trabajador_id,
+                ]);
+            }
+
+            // If not own account, role is required
+            if (!$isOwnAccount && !$rol) {
+                $this->addFlash('error', 'Por favor completa todos los campos requeridos.');
+                return $this->render('trabajadores/edit.html.twig', [
+                    'trabajador' => $trabajador,
+                    'trabajador_name' => $session->get('trabajador_name'),
+                    'trabajador_role' => $session->get('trabajador_role'),
+                    'current_trabajador_id' => $trabajador_id,
                 ]);
             }
 
@@ -166,7 +181,12 @@ class TrabajadoresController extends AbstractController
             $trabajador->setApellidos($apellidos);
             $trabajador->setEmail($email);
             $trabajador->setTelefonoNumero($telefono ?? '');
-            $trabajador->setRol($rol);
+            
+            // Only update role if not editing own account
+            if (!$isOwnAccount) {
+                $trabajador->setRol($rol);
+            }
+            
             $trabajador->setActivo((bool) $activo);
             
             // Only update password if provided
@@ -185,6 +205,7 @@ class TrabajadoresController extends AbstractController
             'trabajador' => $trabajador,
             'trabajador_name' => $session->get('trabajador_name'),
             'trabajador_role' => $session->get('trabajador_role'),
+            'current_trabajador_id' => $trabajador_id,
         ]);
     }
 }
