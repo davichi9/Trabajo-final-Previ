@@ -4,16 +4,18 @@ namespace App\Controller;
 
 use App\Entity\Trabajadores;
 use App\Repository\TrabajadoresRepository;
+use App\Repository\PedidosRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use DateTime;
 
 class TrabajadoresController extends AbstractController
 {
     #[Route('/trabajadores', name: 'app_trabajadores_list', methods: ['GET'])]
-    public function list(Request $request, TrabajadoresRepository $trabajadoresRepo): Response
+    public function list(Request $request, TrabajadoresRepository $trabajadoresRepo, PedidosRepository $pedidosRepo): Response
     {
         $session = $request->getSession();
         $trabajador_id = $session->get('trabajador_id');
@@ -35,11 +37,24 @@ class TrabajadoresController extends AbstractController
         // Get trabajadores filtered by search term
         $trabajadores = $trabajadoresRepo->searchTrabajadores($searchTerm);
 
+        // Get current month and year
+        $now = new DateTime();
+        $currentMonth = (int) $now->format('m');
+        $currentYear = (int) $now->format('Y');
+        
+        // Count pedidos per trabajador for current month
+        $pedidosCount = [];
+        foreach ($trabajadores as $trabajador) {
+            $count = $pedidosRepo->countPedidosByTrabajadorAndMonth($trabajador->getId(), $currentYear, $currentMonth);
+            $pedidosCount[$trabajador->getId()] = $count;
+        }
+
         return $this->render('trabajadores/list.html.twig', [
             'trabajadores' => $trabajadores,
             'searchTerm' => $searchTerm,
             'trabajador_name' => $session->get('trabajador_name'),
             'trabajador_role' => $session->get('trabajador_role'),
+            'pedidosCount' => $pedidosCount,
         ]);
     }
 

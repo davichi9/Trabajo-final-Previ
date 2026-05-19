@@ -64,4 +64,28 @@ class PedidosRepository extends ServiceEntityRepository
 
         return $query->getResult();
     }
+
+    /**
+     * Count pedidos for a specific trabajador in a given month
+     */
+    public function countPedidosByTrabajadorAndMonth(int $trabajadorId, int $year, int $month): int
+    {
+        $startDate = new \DateTime("$year-$month-01");
+        $endDate = clone $startDate;
+        $endDate->modify('last day of this month');
+        $endDate->setTime(23, 59, 59);
+
+        $qb = $this->createQueryBuilder('p');
+        
+        return $qb
+            ->select('COUNT(p.id)')
+            ->where('p.trabajador = :trabajadorId')
+            ->andWhere('p.fechaEntrada >= :startDate')
+            ->andWhere('p.fechaEntrada <= :endDate')
+            ->setParameter('trabajadorId', $trabajadorId)
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }
