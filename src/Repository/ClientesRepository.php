@@ -20,4 +20,30 @@ class ClientesRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Clientes::class);
     }
+
+    /**
+     * Search clients by any field (id, nombre, apellidos, telefonoNumero, email, domicilio)
+     */
+    public function searchClientes(?string $searchTerm): array
+    {
+        if (!$searchTerm) {
+            return $this->findAll();
+        }
+
+        $qb = $this->createQueryBuilder('c');
+        
+        $qb->where(
+            $qb->expr()->orX(
+                $qb->expr()->like('c.id', ':searchTerm'),
+                $qb->expr()->like('c.nombre', ':searchTerm'),
+                $qb->expr()->like('c.apellidos', ':searchTerm'),
+                $qb->expr()->like('c.telefonoNumero', ':searchTerm'),
+                $qb->expr()->like('c.email', ':searchTerm'),
+                $qb->expr()->like('c.domicilio', ':searchTerm')
+            )
+        )
+        ->setParameter('searchTerm', '%' . $searchTerm . '%');
+
+        return $qb->getQuery()->getResult();
+    }
 }

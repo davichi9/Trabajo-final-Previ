@@ -21,10 +21,15 @@ class ClientesController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        $clientes = $clientesRepo->findAll();
+        // Get search query from request
+        $searchTerm = $request->query->get('search', '');
+
+        // Get clients filtered by search term
+        $clientes = $clientesRepo->searchClientes($searchTerm);
 
         return $this->render('clientes/list.html.twig', [
             'clientes' => $clientes,
+            'searchTerm' => $searchTerm,
             'trabajador_name' => $session->get('trabajador_name'),
             'trabajador_role' => $session->get('trabajador_role'),
         ]);
