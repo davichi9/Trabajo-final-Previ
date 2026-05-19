@@ -19,7 +19,10 @@
     <div class="dashboard-content">
         <div class="content-header">
             <h1>Lista de Trabajadores</h1>
-            <a href="{{ path('app_dashboard') }}" class="btn-secondary">Volver al Dashboard</a>
+            <div class="header-buttons">
+                <a href="{{ path('app_trabajadores_create') }}" class="btn-primary">+ Crear Nuevo Trabajador</a>
+                <a href="{{ path('app_dashboard') }}" class="btn-secondary">Volver al Dashboard</a>
+            </div>
         </div>
 
         <div class="search-box-container">
@@ -48,6 +51,7 @@
                             <th>Apellidos</th>
                             <th>Rol</th>
                             <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -63,6 +67,9 @@
                                     {% else %}
                                         <span class="badge badge-inactive">Inactivo</span>
                                     {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ path('app_trabajadores_edit', {id: trabajador.id}) }}" class="btn-edit">Editar</a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -83,6 +90,11 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 2rem;
+    }
+
+    .header-buttons {
+        display: flex;
+        gap: 0.5rem;
     }
 
     .search-box-container {
@@ -210,6 +222,21 @@
         color: #6c757d;
         background-color: #f8f9fa;
         border-radius: 4px;
+    }
+
+    .btn-edit {
+        padding: 0.5rem 1rem;
+        background-color: #17a2b8;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+
+    .btn-edit:hover {
+        background-color: #138496;
     }
 </style>
 {% endblock %}

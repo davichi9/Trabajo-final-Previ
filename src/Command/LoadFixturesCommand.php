@@ -116,7 +116,7 @@ class LoadFixturesCommand extends Command
                 'telefono' => '912345679',
                 'email' => 'elena.fernandez@empresa.com',
                 'contraseña' => 'password123',
-                'rol' => 'worker',
+                'rol' => 'trabajador',
             ],
             [
                 'nombre' => 'David',
@@ -124,7 +124,7 @@ class LoadFixturesCommand extends Command
                 'telefono' => '912345680',
                 'email' => 'david.jimenez@empresa.com',
                 'contraseña' => 'password123',
-                'rol' => 'worker',
+                'rol' => 'trabajador',
             ],
         ];
 
