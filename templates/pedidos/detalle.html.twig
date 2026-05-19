@@ -25,12 +25,8 @@
             </div>
         </div>
 
-        {% for msg in app.flashes('success') %}
-            <div class="flash-success">{{ msg }}</div>
-        {% endfor %}
-        {% for msg in app.flashes('error') %}
-            <div class="flash-error">{{ msg }}</div>
-        {% endfor %}
+        {% for msg in app.flashes('success') %}<div class="flash-success">{{ msg }}</div>{% endfor %}
+        {% for msg in app.flashes('error') %}<div class="flash-error">{{ msg }}</div>{% endfor %}
 
         {# Vista de detalle #}
         <div id="view-detail">
@@ -52,7 +48,7 @@
         {# Formulario de edición (oculto por defecto) #}
         <div id="view-edit" style="display:none">
             <form method="POST" action="{{ path('app_pedido_edit', {id: pedido.id}) }}">
-                <div class="detail-card" style="padding:1.5rem; margin-bottom:1rem;">
+                <div class="detail-card edit-card">
                     <div class="detail-row"><label>Estado</label>
                         <select name="estado">{% for val in ['no terminado','terminado','recogido'] %}<option value="{{ val }}" {{ pedido.estado==val?'selected' }}>{{ val|capitalize }}</option>{% endfor %}</select></div>
                     <div class="detail-row"><label>Contenido</label>
@@ -66,7 +62,7 @@
                     <div class="detail-row"><label>Pagado</label>
                         <select name="pagado"><option value="0" {{ not pedido.pagado?'selected' }}>No</option><option value="1" {{ pedido.pagado?'selected' }}>Sí</option></select></div>
                     <div class="detail-row"><label>Cliente</label>
-                        <div style="flex:1;display:flex;flex-direction:column;gap:0.4rem">
+                        <div class="cliente-search">
                             <input type="text" placeholder="Buscar por teléfono..." autocomplete="off" oninput="filtrarClientes(this.value)">
                             <select name="cliente_id" id="cliente-select" size="5">
                                 {% for c in clientes %}<option value="{{ c.id }}" data-phone="{{ c.telefonoNumero }}" {{ c.id==pedido.cliente.id?'selected' }}>{{ c.telefonoNumero }} — {{ c.nombre }} {{ c.apellidos }}</option>{% endfor %}
@@ -78,7 +74,7 @@
                     <div class="detail-row"><label>Observaciones</label>
                         <textarea name="observaciones" rows="3">{{ pedido.observaciones ?? '' }}</textarea></div>
                 </div>
-                <div style="display:flex;gap:0.75rem">
+                <div class="form-actions">
                     <button type="submit" class="btn-primary">Aplicar cambios</button>
                     <button type="button" class="btn-secondary" onclick="toggleEdit()">Cancelar</button>
                 </div>
@@ -107,6 +103,9 @@
     .detail-row input:focus, .detail-row select:focus, .detail-row textarea:focus { outline: none; border-color: #ff6a00; }
     .link-cliente { color: #ff6a00; text-decoration: none; font-weight: 500; }
     .link-cliente:hover { text-decoration: underline; }
+    .edit-card { padding: 1.5rem; margin-bottom: 1rem; }
+    .cliente-search { flex: 1; display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-actions { display: flex; gap: 0.75rem; }
 </style>
 
 <script>
