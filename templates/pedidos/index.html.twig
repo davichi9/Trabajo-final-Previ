@@ -23,16 +23,28 @@
         </div>
 
         <div class="search-box-container">
+            <div class="search-filters">
+                <a href="{{ path('app_pedidos_list', app.request.query.all|merge({'estado': estadoFiltro == 'recogido' ? null : 'recogido', 'search': searchTerm})|filter(v => v is not null)) }}"
+                   class="btn-toggle {{ estadoFiltro == 'recogido' ? 'btn-toggle--active' }}">
+                    Recogidos
+                </a>
+                <a href="{{ path('app_pedidos_list', app.request.query.all|merge({'pagado': pagadoFiltro == '1' ? null : '1', 'search': searchTerm})|filter(v => v is not null)) }}"
+                   class="btn-toggle {{ pagadoFiltro == '1' ? 'btn-toggle--active' }}">
+                    Pagados
+                </a>
+            </div>
             <form method="GET" action="{{ path('app_pedidos_list') }}" class="search-form">
+                {% if estadoFiltro is not null %}<input type="hidden" name="estado" value="{{ estadoFiltro }}">{% endif %}
+                {% if pagadoFiltro is not null %}<input type="hidden" name="pagado" value="{{ pagadoFiltro }}">{% endif %}
                 <input
                     type="text"
                     name="search"
                     class="search-input"
-                    placeholder="Buscar por ID, estado, contenido, cliente o teléfono..."
+                    placeholder="Buscar por número de pedido..."
                     value="{{ searchTerm }}"
                 >
                 <button type="submit" class="btn-search">Buscar</button>
-                {% if searchTerm %}
+                {% if searchTerm or estadoFiltro is not null or pagadoFiltro is not null %}
                     <a href="{{ path('app_pedidos_list') }}" class="btn-clear">Limpiar</a>
                 {% endif %}
             </form>
@@ -45,7 +57,6 @@
                         <tr>
                             <th>ID</th>
                             <th>Cliente</th>
-                            <th>Teléfono</th>
                             <th>Estado</th>
                             <th>Fecha entrada</th>
                             <th>Precio</th>
@@ -57,7 +68,6 @@
                             <tr>
                                 <td>#{{ pedido.id }}</td>
                                 <td>{{ pedido.cliente.nombre }} {{ pedido.cliente.apellidos }}</td>
-                                <td>{{ pedido.cliente.telefonoNumero }}</td>
                                 <td>{{ pedido.estado }}</td>
                                 <td>{{ pedido.fechaEntrada|date('d/m/Y') }}</td>
                                 <td>{{ pedido.precio|number_format(2, ',', '.') }} €</td>
@@ -86,6 +96,31 @@
     .search-box-container {
         margin-bottom: 2rem;
     }
+
+    .search-filters {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .btn-toggle {
+        padding: 0.5rem 1rem;
+        background-color: #e9ecef;
+        color: #333;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        transition: background-color 0.2s;
+    }
+
+    .btn-toggle:hover { background-color: #dee2e6; }
+
+    .btn-toggle--active {
+        background-color: #ff6a00;
+        color: white;
+    }
+
+    .btn-toggle--active:hover { background-color: #e55a00; }
 
     .search-form {
         display: flex;
