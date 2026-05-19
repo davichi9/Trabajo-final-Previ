@@ -22,12 +22,21 @@ class PedidosDashboardController extends AbstractController
         $searchTerm = $request->query->get('search', '');
         $estados = $request->query->all('estado');
         $pagados = $request->query->all('pagado');
+        $perPage = 10;
+        $page = max(1, (int) $request->query->get('page', 1));
+
+        $total = $pedidosRepo->countPedidos($searchTerm, $estados, $pagados);
+        $totalPages = max(1, (int) ceil($total / $perPage));
+        $page = min($page, $totalPages);
 
         return $this->render('pedidos/index.html.twig', [
-            'pedidos' => $pedidosRepo->searchPedidos($searchTerm, $estados, $pagados),
+            'pedidos' => $pedidosRepo->searchPedidos($searchTerm, $estados, $pagados, $page, $perPage),
             'searchTerm' => $searchTerm,
             'estadosFiltro' => $estados,
             'pagadosFiltro' => $pagados,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'total' => $total,
             'trabajador_name' => $session->get('trabajador_name'),
             'trabajador_role' => $session->get('trabajador_role'),
         ]);

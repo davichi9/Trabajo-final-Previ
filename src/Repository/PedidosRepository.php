@@ -22,7 +22,7 @@ class PedidosRepository extends ServiceEntityRepository
         parent::__construct($registry, Pedidos::class);
     }
 
-    public function searchPedidos(?string $searchTerm, array $estados = [], array $pagados = []): array
+    private function buildSearchQuery(?string $searchTerm, array $estados = [], array $pagados = []): \Doctrine\ORM\QueryBuilder
     {
         $qb = $this->createQueryBuilder('p');
 
@@ -41,7 +41,26 @@ class PedidosRepository extends ServiceEntityRepository
             $qb->andWhere('p.pagado IN (:pagados)')->setParameter('pagados', array_map('boolval', $pagados));
         }
 
-        return $qb->getQuery()->getResult();
+        return $qb;
+    }
+
+    public function searchPedidos(?string $searchTerm, array $estados = [], array $pagados = [], int $page = 1, int $perPage = 10): array
+    {
+        $offset = ($page - 1) * $perPage;
+
+        return $this->buildSearchQuery($searchTerm, $estados, $pagados)
+            ->setFirstResult($offset)
+            ->setMaxResults($perPage)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function countPedidos(?string $searchTerm, array $estados = [], array $pagados = []): int
+    {
+        return (int) $this->buildSearchQuery($searchTerm, $estados, $pagados)
+            ->select('COUNT(p.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 
     /**
