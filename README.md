@@ -56,7 +56,7 @@ Si estás usando XAMPP, asegúrate de que MySQL esté ejecutándose.
 |--------|-------|------------|-----|
 | Carlos Hernández | carlos.hernandez@empresa.com | password123 | supervisor |
 | Elena Fernández | elena.fernandez@empresa.com | password123 | supervisor |
-| David Jiménez | david.jimenez@empresa.com | password123 | worker |
+| David Jiménez | david.jimenez@empresa.com | password123 | trabajador |
 
 
 #### Opción B: Usando MySQL local
