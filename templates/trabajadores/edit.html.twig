@@ -77,11 +77,19 @@
 
                 <div class="form-group">
                     <label for="activo">Estado de la Cuenta *</label>
-                    <select id="activo" name="activo" class="form-input" required>
-                        <option value="">Seleccionar estado</option>
-                        <option value="1" {% if trabajador.isActivo() %}selected{% endif %}>Activo</option>
-                        <option value="0" {% if not trabajador.isActivo() %}selected{% endif %}>Inactivo</option>
-                    </select>
+                    {% if trabajador.id == current_trabajador_id %}
+                        <select id="activo" class="form-input" disabled>
+                            <option value="1" {% if trabajador.isActivo() %}selected{% endif %}>Activo</option>
+                            <option value="0" {% if not trabajador.isActivo() %}selected{% endif %}>Inactivo</option>
+                        </select>
+                        <small class="form-hint">No puedes cambiar el estado de tu propia cuenta</small>
+                    {% else %}
+                        <select id="activo" name="activo" class="form-input" required>
+                            <option value="">Seleccionar estado</option>
+                            <option value="1" {% if trabajador.isActivo() %}selected{% endif %}>Activo</option>
+                            <option value="0" {% if not trabajador.isActivo() %}selected{% endif %}>Inactivo</option>
+                        </select>
+                    {% endif %}
                 </div>
 
                 <div class="form-actions">

@@ -151,11 +151,11 @@ class TrabajadoresController extends AbstractController
             $password = $request->request->get('password');
             $activo = $request->request->get('activo');
 
-            // Check if user is trying to change their own role
+            // Check if user is trying to change their own role or account status
             $isOwnAccount = ($id == $trabajador_id);
             
-            // Validate required fields (role not required if editing own account)
-            if (!$nombre || !$apellidos || !$email || $activo === '') {
+            // Validate required fields
+            if (!$nombre || !$apellidos || !$email) {
                 $this->addFlash('error', 'Por favor completa todos los campos requeridos.');
                 return $this->render('trabajadores/edit.html.twig', [
                     'trabajador' => $trabajador,
@@ -165,8 +165,8 @@ class TrabajadoresController extends AbstractController
                 ]);
             }
 
-            // If not own account, role is required
-            if (!$isOwnAccount && !$rol) {
+            // If not own account, role and activo are required
+            if (!$isOwnAccount && (!$rol || $activo === '')) {
                 $this->addFlash('error', 'Por favor completa todos los campos requeridos.');
                 return $this->render('trabajadores/edit.html.twig', [
                     'trabajador' => $trabajador,
@@ -185,9 +185,8 @@ class TrabajadoresController extends AbstractController
             // Only update role if not editing own account
             if (!$isOwnAccount) {
                 $trabajador->setRol($rol);
+                $trabajador->setActivo((bool) $activo);
             }
-            
-            $trabajador->setActivo((bool) $activo);
             
             // Only update password if provided
             if ($password) {
