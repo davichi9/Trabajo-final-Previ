@@ -23,30 +23,38 @@
         </div>
 
         <div class="search-box-container">
-            <div class="search-filters">
-                <a href="{{ path('app_pedidos_list', app.request.query.all|merge({'estado': estadoFiltro == 'recogido' ? null : 'recogido', 'search': searchTerm})|filter(v => v is not null)) }}"
-                   class="btn-toggle {{ estadoFiltro == 'recogido' ? 'btn-toggle--active' }}">
-                    Recogidos
-                </a>
-                <a href="{{ path('app_pedidos_list', app.request.query.all|merge({'pagado': pagadoFiltro == '1' ? null : '1', 'search': searchTerm})|filter(v => v is not null)) }}"
-                   class="btn-toggle {{ pagadoFiltro == '1' ? 'btn-toggle--active' }}">
-                    Pagados
-                </a>
-            </div>
-            <form method="GET" action="{{ path('app_pedidos_list') }}" class="search-form">
-                {% if estadoFiltro is not null %}<input type="hidden" name="estado" value="{{ estadoFiltro }}">{% endif %}
-                {% if pagadoFiltro is not null %}<input type="hidden" name="pagado" value="{{ pagadoFiltro }}">{% endif %}
-                <input
-                    type="text"
-                    name="search"
-                    class="search-input"
-                    placeholder="Buscar por número de pedido..."
-                    value="{{ searchTerm }}"
-                >
-                <button type="submit" class="btn-search">Buscar</button>
-                {% if searchTerm or estadoFiltro is not null or pagadoFiltro is not null %}
-                    <a href="{{ path('app_pedidos_list') }}" class="btn-clear">Limpiar</a>
-                {% endif %}
+            <form method="GET" action="{{ path('app_pedidos_list') }}" class="search-form-wrap">
+                <div class="search-filters">
+                    <span class="filter-label">Estado:</span>
+                    {% for label, val in {'No terminado': 'no terminado', 'Terminado': 'terminado', 'Recogido': 'recogido'} %}
+                    <label class="filter-option">
+                        <input type="checkbox" name="estado[]" value="{{ val }}" {{ val in estadosFiltro ? 'checked' }}>
+                        {{ label }}
+                    </label>
+                    {% endfor %}
+
+                    <span class="filter-label filter-label--sep">Pagado:</span>
+                    {% for label, val in {'Sí': '1', 'No': '0'} %}
+                    <label class="filter-option">
+                        <input type="checkbox" name="pagado[]" value="{{ val }}" {{ val in pagadosFiltro ? 'checked' }}>
+                        {{ label }}
+                    </label>
+                    {% endfor %}
+                </div>
+
+                <div class="search-form">
+                    <input
+                        type="text"
+                        name="search"
+                        class="search-input"
+                        placeholder="Buscar por número de pedido o nombre..."
+                        value="{{ searchTerm }}"
+                    >
+                    <button type="submit" class="btn-search">Buscar</button>
+                    {% if searchTerm or estadosFiltro is not empty or pagadosFiltro is not empty %}
+                        <a href="{{ path('app_pedidos_list') }}" class="btn-clear">Limpiar</a>
+                    {% endif %}
+                </div>
             </form>
         </div>
 
@@ -232,7 +240,85 @@
         border-radius: 8px;
         color: #6c757d;
     }
+
+    .search-form-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .search-filters {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    .filter-label--sep { margin-left: 0.5rem; }
+
+    .filter-option {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-panel {
+        display: none;
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        z-index: 100;
+        min-width: 160px;
+        padding: 0.5rem 0;
+    }
+
+    .dropdown-panel.open { display: block; }
+
+    .dropdown-option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    .dropdown-option:hover { background: #f8f9fa; }
 </style>
+
+<script>
+    function toggleDropdown(id) {
+        document.querySelectorAll('.dropdown-panel').forEach(function(p) {
+            if (p.id !== id) p.classList.remove('open');
+        });
+        document.getElementById(id).classList.toggle('open');
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown')) {
+            document.querySelectorAll('.dropdown-panel').forEach(function(p) {
+                p.classList.remove('open');
+            });
+        }
+    });
+</script>
 {% endblock %}
 
 {% block footer %}{% endblock %}

@@ -22,7 +22,7 @@ class PedidosRepository extends ServiceEntityRepository
         parent::__construct($registry, Pedidos::class);
     }
 
-    public function searchPedidos(?string $searchTerm, ?string $estado = null, ?string $pagado = null): array
+    public function searchPedidos(?string $searchTerm, array $estados = [], array $pagados = []): array
     {
         $qb = $this->createQueryBuilder('p');
 
@@ -33,12 +33,12 @@ class PedidosRepository extends ServiceEntityRepository
                ->setParameter('nombre', '%' . $searchTerm . '%');
         }
 
-        if ($estado !== null) {
-            $qb->andWhere('p.estado = :estado')->setParameter('estado', $estado);
+        if (!empty($estados)) {
+            $qb->andWhere('p.estado IN (:estados)')->setParameter('estados', $estados);
         }
 
-        if ($pagado !== null) {
-            $qb->andWhere('p.pagado = :pagado')->setParameter('pagado', (bool) $pagado);
+        if (!empty($pagados)) {
+            $qb->andWhere('p.pagado IN (:pagados)')->setParameter('pagados', array_map('boolval', $pagados));
         }
 
         return $qb->getQuery()->getResult();

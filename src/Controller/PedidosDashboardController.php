@@ -20,14 +20,14 @@ class PedidosDashboardController extends AbstractController
         }
 
         $searchTerm = $request->query->get('search', '');
-        $estado = $request->query->has('estado') ? $request->query->get('estado') : null;
-        $pagado = $request->query->has('pagado') ? $request->query->get('pagado') : null;
+        $estados = $request->query->all('estado');
+        $pagados = $request->query->all('pagado');
 
         return $this->render('pedidos/index.html.twig', [
-            'pedidos' => $pedidosRepo->searchPedidos($searchTerm, $estado, $pagado),
+            'pedidos' => $pedidosRepo->searchPedidos($searchTerm, $estados, $pagados),
             'searchTerm' => $searchTerm,
-            'estadoFiltro' => $estado,
-            'pagadoFiltro' => $pagado,
+            'estadosFiltro' => $estados,
+            'pagadosFiltro' => $pagados,
             'trabajador_name' => $session->get('trabajador_name'),
             'trabajador_role' => $session->get('trabajador_role'),
         ]);
