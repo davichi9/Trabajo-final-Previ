@@ -25,24 +25,19 @@ class PedidoController extends AbstractController
         $telefono = $request->request->get('telefono');
 
         if (empty($numeroPedido) || empty($telefono)) {
-            $this->addFlash('error', 'Por favor, rellena todos los campos antes de continuar.');
+            $this->addFlash('error', 'Rellena todos los campos.');
             return $this->redirectToRoute('app_pedido');
         }
 
-        try {
-            $pedido = $pedidosRepository->findOneBy(['id' => $numeroPedido]);
-        } catch (\Exception $e) {
-            $this->addFlash('error', 'Error de servidor. Inténtalo de nuevo más tarde.');
-            return $this->redirectToRoute('app_pedido');
-        }
+        $pedido = $pedidosRepository->findOneBy(['id' => $numeroPedido]);
 
         if (!$pedido) {
-            $this->addFlash('error', 'No existe ningún pedido con ese número.');
+            $this->addFlash('error', 'Pedido no encontrado.');
             return $this->redirectToRoute('app_pedido');
         }
 
         if ($pedido->getCliente()->getTelefonoNumero() !== $telefono) {
-            $this->addFlash('error', 'El número de teléfono no coincide con el pedido.');
+            $this->addFlash('error', 'Teléfono incorrecto.');
             return $this->redirectToRoute('app_pedido');
         }
 
@@ -76,7 +71,7 @@ class PedidoController extends AbstractController
         }
 
         if (!$this->isCsrfTokenValid('reporte', $request->request->get('_csrf_token'))) {
-            $this->addFlash('reporte_error', 'Error de seguridad. Inténtalo de nuevo.');
+            $this->addFlash('reporte_error', 'Token inválido.');
             return $this->redirectToRoute('app_pedido_resultado_show', ['id' => $id]);
         }
 
@@ -88,21 +83,15 @@ class PedidoController extends AbstractController
         }
 
         try {
-            $email = (new Email())
+            $mailer->send((new Email())
                 ->from('tintoreriaprueba@gmail.com')
                 ->to('tintoreriaprueba@gmail.com')
-                ->subject('Reporte de incidencia – Pedido #' . $pedido->getId())
-                ->text(
-                    'Pedido: #' . $pedido->getId() . "\n" .
-                    'Cliente: ' . $pedido->getCliente()->getNombre() . ' ' . $pedido->getCliente()->getApellidos() . "\n" .
-                    'Teléfono: ' . $pedido->getCliente()->getTelefonoNumero() . "\n\n" .
-                    'Mensaje:' . "\n" . $mensaje
-                );
-
-            $mailer->send($email);
-            $this->addFlash('reporte_ok', 'Tu reporte ha sido enviado correctamente.');
+                ->subject('Reporte – Pedido #' . $pedido->getId())
+                ->text("Pedido: #{$pedido->getId()}\nCliente: {$pedido->getCliente()->getNombre()} {$pedido->getCliente()->getApellidos()}\nTeléfono: {$pedido->getCliente()->getTelefonoNumero()}\n\n{$mensaje}")
+            );
+            $this->addFlash('reporte_ok', 'Reporte enviado.');
         } catch (\Exception $e) {
-            $this->addFlash('reporte_error', 'Error al enviar el reporte: ' . $e->getMessage());
+            $this->addFlash('reporte_error', 'Error al enviar el reporte.');
         }
 
         $request->getSession()->set('pedido_autorizado', $pedido->getId());

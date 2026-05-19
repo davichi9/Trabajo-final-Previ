@@ -13,15 +13,20 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class PedidosDashboardController extends AbstractController
 {
+    private function requireLogin(Request $request): ?Response
+    {
+        if (!$request->getSession()->get('trabajador_id')) {
+            return $this->redirectToRoute('app_login');
+        }
+        return null;
+    }
+
     #[Route('/dashboard/pedidos', name: 'app_pedidos_list', methods: ['GET'])]
     public function index(Request $request, PedidosRepository $pedidosRepo): Response
     {
+        if ($r = $this->requireLogin($request)) return $r;
+
         $session = $request->getSession();
-
-        if (!$session->get('trabajador_id')) {
-            return $this->redirectToRoute('app_login');
-        }
-
         $searchTerm = $request->query->get('search', '');
         $estados = $request->query->all('estado');
         $pagados = $request->query->all('pagado');
@@ -48,18 +53,14 @@ class PedidosDashboardController extends AbstractController
     #[Route('/dashboard/pedidos/{id}', name: 'app_pedido_detail', methods: ['GET'])]
     public function detail(int $id, Request $request, PedidosRepository $pedidosRepo, ClientesRepository $clientesRepo, TrabajadoresRepository $trabajadoresRepo): Response
     {
-        $session = $request->getSession();
-
-        if (!$session->get('trabajador_id')) {
-            return $this->redirectToRoute('app_login');
-        }
+        if ($r = $this->requireLogin($request)) return $r;
 
         $pedido = $pedidosRepo->find($id);
-
         if (!$pedido) {
             throw $this->createNotFoundException('Pedido no encontrado');
         }
 
+        $session = $request->getSession();
         return $this->render('pedidos/detalle.html.twig', [
             'pedido' => $pedido,
             'clientes' => $clientesRepo->findBy([], ['nombre' => 'ASC']),
@@ -72,11 +73,7 @@ class PedidosDashboardController extends AbstractController
     #[Route('/dashboard/pedidos/{id}/editar', name: 'app_pedido_edit', methods: ['POST'])]
     public function edit(int $id, Request $request, PedidosRepository $pedidosRepo, ClientesRepository $clientesRepo, TrabajadoresRepository $trabajadoresRepo, EntityManagerInterface $em): Response
     {
-        $session = $request->getSession();
-
-        if (!$session->get('trabajador_id')) {
-            return $this->redirectToRoute('app_login');
-        }
+        if ($r = $this->requireLogin($request)) return $r;
 
         $pedido = $pedidosRepo->find($id);
         if (!$pedido) {
@@ -91,13 +88,12 @@ class PedidosDashboardController extends AbstractController
         $fechaSalida = $fechaSalidaStr ? \DateTime::createFromFormat('d/m/Y H:i', $fechaSalidaStr) : null;
 
         if (!$fechaEntrada || ($fechaSalidaStr && !$fechaSalida)) {
-            $this->addFlash('error', 'Formato de fecha inválido. Usa dd/mm/aaaa hh:mm');
+            $this->addFlash('error', 'Fecha inválida. Usa dd/mm/aaaa hh:mm');
             return $this->redirectToRoute('app_pedido_detail', ['id' => $id]);
         }
 
         $pedido->setFechaEntrada($fechaEntrada);
         $pedido->setFechaSalida($fechaSalida);
-
         $pedido->setPrecio((float) str_replace(',', '.', $request->request->get('precio')));
         $pedido->setPagado((bool) $request->request->get('pagado'));
 
@@ -108,12 +104,10 @@ class PedidosDashboardController extends AbstractController
 
         $trabajadorId = $request->request->get('trabajador_id');
         $pedido->setTrabajador($trabajadorId ? $trabajadoresRepo->find((int) $trabajadorId) : null);
-
         $pedido->setObservaciones($request->request->get('observaciones') ?: null);
 
         $em->flush();
-
-        $this->addFlash('success', 'Pedido #' . $id . ' actualizado correctamente.');
+        $this->addFlash('success', 'Pedido actualizado.');
 
         return $this->redirectToRoute('app_pedido_detail', ['id' => $id]);
     }
