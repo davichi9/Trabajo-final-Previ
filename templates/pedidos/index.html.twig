@@ -43,13 +43,9 @@
                 </div>
 
                 <div class="search-form">
-                    <input
-                        type="text"
-                        name="search"
-                        class="search-input"
+                    <input type="text" name="search" class="search-input"
                         placeholder="Buscar por número de pedido o nombre..."
-                        value="{{ searchTerm }}"
-                    >
+                        value="{{ searchTerm }}">
                     <button type="submit" class="btn-search">Buscar</button>
                     {% if searchTerm or estadosFiltro is not empty or pagadosFiltro is not empty %}
                         <a href="{{ path('app_pedidos_list') }}" class="btn-clear">Limpiar</a>
@@ -69,17 +65,19 @@
                             <th>Fecha entrada</th>
                             <th>Precio</th>
                             <th>Pagado</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for pedido in pedidos %}
                             <tr>
                                 <td>#{{ pedido.id }}</td>
-                                <td>{{ pedido.cliente.nombre }} {{ pedido.cliente.apellidos }}</td>
+                                <td><a href="{{ path('app_clientes_list', {search: pedido.cliente.telefonoNumero}) }}" class="link-cliente">{{ pedido.cliente.nombre }} {{ pedido.cliente.apellidos }}</a></td>
                                 <td>{{ pedido.estado }}</td>
                                 <td>{{ pedido.fechaEntrada|date('d/m/Y') }}</td>
                                 <td>{{ pedido.precio|number_format(2, ',', '.') }} €</td>
                                 <td>{{ pedido.pagado ? 'Sí' : 'No' }}</td>
+                                <td><a href="{{ path('app_pedido_detail', {id: pedido.id}) }}" class="btn-detail">Ver detalles</a></td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -92,22 +90,20 @@
         {% endif %}
 
         {% if totalPages > 1 %}
+        {% set fp = {'search': searchTerm, 'estado': estadosFiltro, 'pagado': pagadosFiltro} %}
         <div class="pagination">
             <span class="pagination-info">{{ total }} pedido{{ total != 1 ? 's' }} &mdash; página {{ currentPage }} de {{ totalPages }}</span>
             <div class="pagination-controls">
                 {% if currentPage > 1 %}
-                    <a href="{{ path('app_pedidos_list', {'page': 1, 'search': searchTerm, 'estado': estadosFiltro, 'pagado': pagadosFiltro}) }}" class="page-btn" title="Primera">&laquo;</a>
-                    <a href="{{ path('app_pedidos_list', {'page': currentPage - 1, 'search': searchTerm, 'estado': estadosFiltro, 'pagado': pagadosFiltro}) }}" class="page-btn">&lsaquo;</a>
+                    <a href="{{ path('app_pedidos_list', fp|merge({'page': 1})) }}" class="page-btn" title="Primera">&laquo;</a>
+                    <a href="{{ path('app_pedidos_list', fp|merge({'page': currentPage - 1})) }}" class="page-btn">&lsaquo;</a>
                 {% endif %}
-
                 {% for p in range(max(1, currentPage - 2), min(totalPages, currentPage + 2)) %}
-                    <a href="{{ path('app_pedidos_list', {'page': p, 'search': searchTerm, 'estado': estadosFiltro, 'pagado': pagadosFiltro}) }}"
-                       class="page-btn {{ p == currentPage ? 'page-btn--active' }}">{{ p }}</a>
+                    <a href="{{ path('app_pedidos_list', fp|merge({'page': p})) }}" class="page-btn {{ p == currentPage ? 'page-btn--active' }}">{{ p }}</a>
                 {% endfor %}
-
                 {% if currentPage < totalPages %}
-                    <a href="{{ path('app_pedidos_list', {'page': currentPage + 1, 'search': searchTerm, 'estado': estadosFiltro, 'pagado': pagadosFiltro}) }}" class="page-btn">&rsaquo;</a>
-                    <a href="{{ path('app_pedidos_list', {'page': totalPages, 'search': searchTerm, 'estado': estadosFiltro, 'pagado': pagadosFiltro}) }}" class="page-btn" title="Última">&raquo;</a>
+                    <a href="{{ path('app_pedidos_list', fp|merge({'page': currentPage + 1})) }}" class="page-btn">&rsaquo;</a>
+                    <a href="{{ path('app_pedidos_list', fp|merge({'page': totalPages})) }}" class="page-btn" title="Última">&raquo;</a>
                 {% endif %}
             </div>
         </div>
@@ -155,24 +151,12 @@
     .page-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; height: 2rem; padding: 0 0.5rem; border: 1px solid #dee2e6; border-radius: 4px; background: white; color: #333; font-size: 0.9rem; text-decoration: none; }
     .page-btn:hover { background: #fff8f4; border-color: #ff6a00; color: #ff6a00; }
     .page-btn--active { background: #ff6a00; border-color: #ff6a00; color: white; font-weight: 600; pointer-events: none; }
+    .btn-detail { padding: 0.3rem 0.75rem; background: #ff6a00; color: white; text-decoration: none; border-radius: 4px; font-size: 0.85rem; white-space: nowrap; }
+    .btn-detail:hover { background: #e55a00; }
+    .link-cliente { color: #ff6a00; text-decoration: none; font-weight: 500; }
+    .link-cliente:hover { text-decoration: underline; }
 </style>
 
-<script>
-    function toggleDropdown(id) {
-        document.querySelectorAll('.dropdown-panel').forEach(function(p) {
-            if (p.id !== id) p.classList.remove('open');
-        });
-        document.getElementById(id).classList.toggle('open');
-    }
-
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.dropdown')) {
-            document.querySelectorAll('.dropdown-panel').forEach(function(p) {
-                p.classList.remove('open');
-            });
-        }
-    });
-</script>
 {% endblock %}
 
 {% block footer %}{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Pedido #{{ pedido.id }} - Lavandería{% endblock %}
+
+{% block body %}
+<div class="dashboard-container">
+    <nav class="dashboard-navbar">
+        <div class="dashboard-navbar-content">
+            <h2>Lavandería - Pedidos</h2>
+            <div class="navbar-user">
+                <span>Bienvenido, {{ trabajador_name }} <span class="badge">{{ trabajador_role }}</span></span>
+                <form method="POST" action="{{ path('app_logout') }}" class="logout-form">
+                    <button type="submit" class="btn-logout">Cerrar Sesión</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-content">
+        <div class="content-header">
+            <h1>Detalles del pedido #{{ pedido.id }}</h1>
+            <a href="{{ path('app_pedidos_list') }}" class="btn-secondary">Volver a pedidos</a>
+        </div>
+
+        <div class="detail-card">
+            <dl class="detail-list">
+                <div class="detail-row">
+                    <dt>Número de pedido</dt>
+                    <dd>#{{ pedido.id }}</dd>
+                </div>
+                <div class="detail-row">
+                    <dt>Estado</dt>
+                    <dd>{{ pedido.estado }}</dd>
+                </div>
+                <div class="detail-row">
+                    <dt>Cliente</dt>
+                    <dd><a href="{{ path('app_clientes_list', {search: pedido.cliente.telefonoNumero}) }}" class="link-cliente">{{ pedido.cliente.nombre }} {{ pedido.cliente.apellidos }}</a></dd>
+                </div>
+                <div class="detail-row">
+                    <dt>Teléfono cliente</dt>
+                    <dd>{{ pedido.cliente.telefonoNumero }}</dd>
+                </div>
+                <div class="detail-row">
+                    <dt>Contenido</dt>
+                    <dd>{{ pedido.contenido }}</dd>
+                </div>
+                <div class="detail-row">
+                    <dt>Fecha de entrada</dt>
+                    <dd>{{ pedido.fechaEntrada|date('d/m/Y H:i') }}</dd>
+                </div>
+                <div class="detail-row">
+                    <dt>Fecha de salida</dt>
+                    <dd>{{ pedido.fechaSalida ? pedido.fechaSalida|date('d/m/Y H:i') : '—' }}</dd>
+                </div>
+                <div class="detail-row">
+                    <dt>Precio</dt>
+                    <dd>{{ pedido.precio|number_format(2, ',', '.') }} €</dd>
+                </div>
+                <div class="detail-row">
+                    <dt>Pagado</dt>
+                    <dd>{{ pedido.pagado ? 'Sí' : 'No' }}</dd>
+                </div>
+                <div class="detail-row">
+                    <dt>Gestionado por</dt>
+                    <dd>{{ pedido.trabajador ? pedido.trabajador.nombre ~ ' ' ~ pedido.trabajador.apellidos : '—' }}</dd>
+                </div>
+                <div class="detail-row">
+                    <dt>Observaciones</dt>
+                    <dd>{{ pedido.observaciones ?? '—' }}</dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+</div>
+
+<style>
+    .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .btn-secondary { padding: 0.5rem 1rem; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; font-size: 0.95rem; }
+    .btn-secondary:hover { background: #5a6268; }
+
+    .detail-card { background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; }
+    .detail-list { margin: 0; padding: 0; }
+    .detail-row { display: flex; padding: 0.85rem 1.5rem; border-bottom: 1px solid #dee2e6; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row:nth-child(even) { background: #f8f9fa; }
+    dt { width: 200px; flex-shrink: 0; font-weight: 600; color: #555; font-size: 0.9rem; }
+    dd { margin: 0; color: #333; font-size: 0.95rem; }
+    .link-cliente { color: #ff6a00; text-decoration: none; font-weight: 500; }
+    .link-cliente:hover { text-decoration: underline; }
+</style>
+{% endblock %}
+
+{% block footer %}{% endblock %}

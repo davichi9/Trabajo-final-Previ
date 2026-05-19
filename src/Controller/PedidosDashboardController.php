@@ -41,4 +41,26 @@ class PedidosDashboardController extends AbstractController
             'trabajador_role' => $session->get('trabajador_role'),
         ]);
     }
+
+    #[Route('/dashboard/pedidos/{id}', name: 'app_pedido_detail', methods: ['GET'])]
+    public function detail(int $id, Request $request, PedidosRepository $pedidosRepo): Response
+    {
+        $session = $request->getSession();
+
+        if (!$session->get('trabajador_id')) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $pedido = $pedidosRepo->find($id);
+
+        if (!$pedido) {
+            throw $this->createNotFoundException('Pedido no encontrado');
+        }
+
+        return $this->render('pedidos/detalle.html.twig', [
+            'pedido' => $pedido,
+            'trabajador_name' => $session->get('trabajador_name'),
+            'trabajador_role' => $session->get('trabajador_role'),
+        ]);
+    }
 }
