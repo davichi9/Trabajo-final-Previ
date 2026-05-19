@@ -4,16 +4,18 @@ namespace App\Controller;
 
 use App\Entity\Trabajadores;
 use App\Repository\TrabajadoresRepository;
+use App\Repository\PedidosRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use DateTime;
 
 class TrabajadoresController extends AbstractController
 {
     #[Route('/trabajadores', name: 'app_trabajadores_list', methods: ['GET'])]
-    public function list(Request $request, TrabajadoresRepository $trabajadoresRepo): Response
+    public function list(Request $request, TrabajadoresRepository $trabajadoresRepo, PedidosRepository $pedidosRepo): Response
     {
         $session = $request->getSession();
         $trabajador_id = $session->get('trabajador_id');
@@ -35,11 +37,24 @@ class TrabajadoresController extends AbstractController
         // Get trabajadores filtered by search term
         $trabajadores = $trabajadoresRepo->searchTrabajadores($searchTerm);
 
+        // Get current month and year
+        $now = new DateTime();
+        $currentMonth = (int) $now->format('m');
+        $currentYear = (int) $now->format('Y');
+        
+        // Count pedidos per trabajador for current month
+        $pedidosCount = [];
+        foreach ($trabajadores as $trabajador) {
+            $count = $pedidosRepo->countPedidosByTrabajadorAndMonth($trabajador->getId(), $currentYear, $currentMonth);
+            $pedidosCount[$trabajador->getId()] = $count;
+        }
+
         return $this->render('trabajadores/list.html.twig', [
             'trabajadores' => $trabajadores,
             'searchTerm' => $searchTerm,
             'trabajador_name' => $session->get('trabajador_name'),
             'trabajador_role' => $session->get('trabajador_role'),
+            'pedidosCount' => $pedidosCount,
         ]);
     }
 
@@ -136,13 +151,28 @@ class TrabajadoresController extends AbstractController
             $password = $request->request->get('password');
             $activo = $request->request->get('activo');
 
+            // Check if user is trying to change their own role or account status
+            $isOwnAccount = ($id == $trabajador_id);
+            
             // Validate required fields
-            if (!$nombre || !$apellidos || !$email || !$rol || $activo === '') {
+            if (!$nombre || !$apellidos || !$email) {
                 $this->addFlash('error', 'Por favor completa todos los campos requeridos.');
                 return $this->render('trabajadores/edit.html.twig', [
                     'trabajador' => $trabajador,
                     'trabajador_name' => $session->get('trabajador_name'),
                     'trabajador_role' => $session->get('trabajador_role'),
+                    'current_trabajador_id' => $trabajador_id,
+                ]);
+            }
+
+            // If not own account, role and activo are required
+            if (!$isOwnAccount && (!$rol || $activo === '')) {
+                $this->addFlash('error', 'Por favor completa todos los campos requeridos.');
+                return $this->render('trabajadores/edit.html.twig', [
+                    'trabajador' => $trabajador,
+                    'trabajador_name' => $session->get('trabajador_name'),
+                    'trabajador_role' => $session->get('trabajador_role'),
+                    'current_trabajador_id' => $trabajador_id,
                 ]);
             }
 
@@ -151,8 +181,12 @@ class TrabajadoresController extends AbstractController
             $trabajador->setApellidos($apellidos);
             $trabajador->setEmail($email);
             $trabajador->setTelefonoNumero($telefono ?? '');
-            $trabajador->setRol($rol);
-            $trabajador->setActivo((bool) $activo);
+            
+            // Only update role if not editing own account
+            if (!$isOwnAccount) {
+                $trabajador->setRol($rol);
+                $trabajador->setActivo((bool) $activo);
+            }
             
             // Only update password if provided
             if ($password) {
@@ -170,6 +204,45 @@ class TrabajadoresController extends AbstractController
             'trabajador' => $trabajador,
             'trabajador_name' => $session->get('trabajador_name'),
             'trabajador_role' => $session->get('trabajador_role'),
+            'current_trabajador_id' => $trabajador_id,
         ]);
+    }
+
+    #[Route('/trabajadores/{id}/eliminar', name: 'app_trabajadores_delete', methods: ['POST'])]
+    public function delete(Request $request, int $id, TrabajadoresRepository $trabajadoresRepo, EntityManagerInterface $entityManager): Response
+    {
+        $session = $request->getSession();
+        $trabajador_id = $session->get('trabajador_id');
+
+        // Redirect to login if not authenticated
+        if (!$trabajador_id) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        // Check if user is supervisor
+        $trabajador_role = $session->get('trabajador_role');
+        if ($trabajador_role !== 'supervisor') {
+            return $this->redirectToRoute('app_dashboard');
+        }
+
+        // Prevent self-deletion
+        if ($id == $trabajador_id) {
+            $this->addFlash('error', 'No puedes eliminar tu propia cuenta.');
+            return $this->redirectToRoute('app_trabajadores_edit', ['id' => $id]);
+        }
+
+        // Get the trabajador to delete
+        $trabajador = $trabajadoresRepo->find($id);
+        if (!$trabajador) {
+            $this->addFlash('error', 'Trabajador no encontrado.');
+            return $this->redirectToRoute('app_trabajadores_list');
+        }
+
+        // Delete the trabajador
+        $entityManager->remove($trabajador);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Trabajador eliminado exitosamente.');
+        return $this->redirectToRoute('app_trabajadores_list');
     }
 }

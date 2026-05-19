@@ -51,6 +51,7 @@
                             <th>Apellidos</th>
                             <th>Rol</th>
                             <th>Estado</th>
+                            <th>Pedidos manejados este mes</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -67,6 +68,9 @@
                                     {% else %}
                                         <span class="badge badge-inactive">Inactivo</span>
                                     {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge badge-info">{{ pedidosCount[trabajador.id] }}</span>
                                 </td>
                                 <td>
                                     <a href="{{ path('app_trabajadores_edit', {id: trabajador.id}) }}" class="btn-edit">Editar</a>
@@ -214,6 +218,11 @@
     .badge-inactive {
         background-color: #f8d7da;
         color: #721c24;
+    }
+
+    .badge-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
     }
 
     .empty-state {
