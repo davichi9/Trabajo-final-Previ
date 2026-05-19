@@ -20,4 +20,21 @@ class TrabajadoresRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Trabajadores::class);
     }
+
+    public function searchTrabajadores(string $searchTerm = ''): array
+    {
+        $qb = $this->createQueryBuilder('t');
+
+        if ($searchTerm) {
+            $qb->where('t.id LIKE :search')
+                ->orWhere('t.nombre LIKE :search')
+                ->orWhere('t.apellidos LIKE :search')
+                ->orWhere('t.telefonoNumero LIKE :search')
+                ->orWhere('t.email LIKE :search')
+                ->orWhere('t.rol LIKE :search')
+                ->setParameter('search', '%' . $searchTerm . '%');
+        }
+
+        return $qb->orderBy('t.nombre', 'ASC')->getQuery()->getResult();
+    }
 }
