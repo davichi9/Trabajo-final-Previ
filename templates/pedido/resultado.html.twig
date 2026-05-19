@@ -84,6 +84,24 @@
                 <a href="{{ path('app_pedido') }}" class="btn-secondary">
                     ← Volver a consultar
                 </a>
+                <button type="button" class="btn-secondary" onclick="document.getElementById('reporte-form').classList.toggle('reporte-form--visible')">
+                    Notificar un error en este pedido
+                </button>
+            </div>
+
+            <div id="reporte-form" class="reporte-form">
+                {% for mensaje in app.flashes('reporte_ok') %}
+                    <p class="reporte-ok">{{ mensaje }}</p>
+                {% endfor %}
+                {% for mensaje in app.flashes('reporte_error') %}
+                    <p class="pedido-error">{{ mensaje }}</p>
+                {% endfor %}
+                <form method="post" action="{{ path('app_pedido_reporte', {id: pedido.id}) }}">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('reporte') }}">
+                    <label for="reporte-mensaje">Describe el problema o error</label>
+                    <textarea id="reporte-mensaje" name="mensaje" rows="4" placeholder="Escribe aquí tu mensaje..." required></textarea>
+                    <button type="submit" class="btn-primary">Enviar reporte</button>
+                </form>
             </div>
 
         </div>

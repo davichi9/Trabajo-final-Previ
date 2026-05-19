@@ -6,6 +6,8 @@ use App\Repository\PedidosRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 
 class PedidoController extends AbstractController
@@ -62,5 +64,48 @@ class PedidoController extends AbstractController
         return $this->render('pedido/resultado.html.twig', [
             'pedido' => $pedido,
         ]);
+    }
+
+    #[Route('/pedido/resultado/{id}/reporte', name: 'app_pedido_reporte', methods: ['POST'])]
+    public function reporte(int $id, Request $request, PedidosRepository $pedidosRepository, MailerInterface $mailer): Response
+    {
+        $pedido = $pedidosRepository->find($id);
+
+        if (!$pedido) {
+            return $this->redirectToRoute('app_pedido');
+        }
+
+        if (!$this->isCsrfTokenValid('reporte', $request->request->get('_csrf_token'))) {
+            $this->addFlash('reporte_error', 'Error de seguridad. Inténtalo de nuevo.');
+            return $this->redirectToRoute('app_pedido_resultado_show', ['id' => $id]);
+        }
+
+        $mensaje = trim($request->request->get('mensaje', ''));
+
+        if (empty($mensaje)) {
+            $this->addFlash('reporte_error', 'El mensaje no puede estar vacío.');
+            return $this->redirectToRoute('app_pedido_resultado_show', ['id' => $id]);
+        }
+
+        try {
+            $email = (new Email())
+                ->from('tintoreriaprueba@gmail.com')
+                ->to('tintoreriaprueba@gmail.com')
+                ->subject('Reporte de incidencia – Pedido #' . $pedido->getId())
+                ->text(
+                    'Pedido: #' . $pedido->getId() . "\n" .
+                    'Cliente: ' . $pedido->getCliente()->getNombre() . ' ' . $pedido->getCliente()->getApellidos() . "\n" .
+                    'Teléfono: ' . $pedido->getCliente()->getTelefonoNumero() . "\n\n" .
+                    'Mensaje:' . "\n" . $mensaje
+                );
+
+            $mailer->send($email);
+            $this->addFlash('reporte_ok', 'Tu reporte ha sido enviado correctamente.');
+        } catch (\Exception $e) {
+            $this->addFlash('reporte_error', 'Error al enviar el reporte: ' . $e->getMessage());
+        }
+
+        $request->getSession()->set('pedido_autorizado', $pedido->getId());
+        return $this->redirectToRoute('app_pedido_resultado_show', ['id' => $id]);
     }
 }
