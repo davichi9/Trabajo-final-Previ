@@ -19,75 +19,114 @@
     <div class="dashboard-content">
         <div class="content-header">
             <h1>Detalles del pedido #{{ pedido.id }}</h1>
-            <a href="{{ path('app_pedidos_list') }}" class="btn-secondary">Volver a pedidos</a>
+            <div class="header-actions">
+                <button type="button" class="btn-primary" id="btn-toggle-edit" onclick="toggleEdit()">Editar pedido</button>
+                <a href="{{ path('app_pedidos_list') }}" class="btn-secondary">Volver a pedidos</a>
+            </div>
         </div>
 
-        <div class="detail-card">
-            <dl class="detail-list">
-                <div class="detail-row">
-                    <dt>Número de pedido</dt>
-                    <dd>#{{ pedido.id }}</dd>
-                </div>
-                <div class="detail-row">
-                    <dt>Estado</dt>
-                    <dd>{{ pedido.estado }}</dd>
-                </div>
-                <div class="detail-row">
-                    <dt>Cliente</dt>
-                    <dd><a href="{{ path('app_clientes_list', {search: pedido.cliente.telefonoNumero}) }}" class="link-cliente">{{ pedido.cliente.nombre }} {{ pedido.cliente.apellidos }}</a></dd>
-                </div>
-                <div class="detail-row">
-                    <dt>Teléfono cliente</dt>
-                    <dd>{{ pedido.cliente.telefonoNumero }}</dd>
-                </div>
-                <div class="detail-row">
-                    <dt>Contenido</dt>
-                    <dd>{{ pedido.contenido }}</dd>
-                </div>
-                <div class="detail-row">
-                    <dt>Fecha de entrada</dt>
-                    <dd>{{ pedido.fechaEntrada|date('d/m/Y H:i') }}</dd>
-                </div>
-                <div class="detail-row">
-                    <dt>Fecha de salida</dt>
-                    <dd>{{ pedido.fechaSalida ? pedido.fechaSalida|date('d/m/Y H:i') : '—' }}</dd>
-                </div>
-                <div class="detail-row">
-                    <dt>Precio</dt>
-                    <dd>{{ pedido.precio|number_format(2, ',', '.') }} €</dd>
-                </div>
-                <div class="detail-row">
-                    <dt>Pagado</dt>
-                    <dd>{{ pedido.pagado ? 'Sí' : 'No' }}</dd>
-                </div>
-                <div class="detail-row">
-                    <dt>Gestionado por</dt>
-                    <dd>{{ pedido.trabajador ? pedido.trabajador.nombre ~ ' ' ~ pedido.trabajador.apellidos : '—' }}</dd>
-                </div>
-                <div class="detail-row">
-                    <dt>Observaciones</dt>
-                    <dd>{{ pedido.observaciones ?? '—' }}</dd>
-                </div>
-            </dl>
+        {% for msg in app.flashes('success') %}<div class="flash-success">{{ msg }}</div>{% endfor %}
+        {% for msg in app.flashes('error') %}<div class="flash-error">{{ msg }}</div>{% endfor %}
+
+        {# Vista de detalle #}
+        <div id="view-detail">
+            <div class="detail-card">
+                <div class="detail-row"><dt>Número de pedido</dt><dd>#{{ pedido.id }}</dd></div>
+                    <div class="detail-row"><dt>Estado</dt><dd>{{ pedido.estado }}</dd></div>
+                    <div class="detail-row"><dt>Cliente</dt><dd><a href="{{ path('app_clientes_list', {search: pedido.cliente.telefonoNumero}) }}" class="link-cliente">{{ pedido.cliente.nombre }} {{ pedido.cliente.apellidos }}</a></dd></div>
+                    <div class="detail-row"><dt>Teléfono cliente</dt><dd>{{ pedido.cliente.telefonoNumero }}</dd></div>
+                    <div class="detail-row"><dt>Contenido</dt><dd>{{ pedido.contenido }}</dd></div>
+                    <div class="detail-row"><dt>Fecha de entrada</dt><dd>{{ pedido.fechaEntrada|date('d/m/Y H:i') }}</dd></div>
+                    <div class="detail-row"><dt>Fecha de salida</dt><dd>{{ pedido.fechaSalida ? pedido.fechaSalida|date('d/m/Y H:i') : '—' }}</dd></div>
+                    <div class="detail-row"><dt>Precio</dt><dd>{{ pedido.precio|number_format(2, ',', '.') }} €</dd></div>
+                    <div class="detail-row"><dt>Pagado</dt><dd>{{ pedido.pagado ? 'Sí' : 'No' }}</dd></div>
+                    <div class="detail-row"><dt>Gestionado por</dt><dd>{{ pedido.trabajador ? pedido.trabajador.nombre ~ ' ' ~ pedido.trabajador.apellidos : '—' }}</dd></div>
+                    <div class="detail-row"><dt>Observaciones</dt><dd>{{ pedido.observaciones ?? '—' }}</dd></div>
+            </div>
         </div>
+
+        {# Formulario de edición (oculto por defecto) #}
+        <div id="view-edit" style="display:none">
+            <form method="POST" action="{{ path('app_pedido_edit', {id: pedido.id}) }}">
+                <div class="detail-card edit-card">
+                    <div class="detail-row"><label>Estado</label>
+                        <select name="estado">{% for val in ['no terminado','terminado','recogido'] %}<option value="{{ val }}" {{ pedido.estado==val?'selected' }}>{{ val|capitalize }}</option>{% endfor %}</select></div>
+                    <div class="detail-row"><label>Contenido</label>
+                        <textarea name="contenido" rows="3">{{ pedido.contenido }}</textarea></div>
+                    <div class="detail-row"><label>Fecha entrada</label>
+                        <input type="text" name="fecha_entrada" placeholder="dd/mm/aaaa hh:mm" value="{{ pedido.fechaEntrada|date('d/m/Y H:i') }}"></div>
+                    <div class="detail-row"><label>Fecha salida</label>
+                        <input type="text" name="fecha_salida" placeholder="dd/mm/aaaa hh:mm (opcional)" value="{{ pedido.fechaSalida ? pedido.fechaSalida|date('d/m/Y H:i') : '' }}"></div>
+                    <div class="detail-row"><label>Precio (€)</label>
+                        <input type="number" name="precio" step="0.01" min="0" value="{{ pedido.precio }}"></div>
+                    <div class="detail-row"><label>Pagado</label>
+                        <select name="pagado"><option value="0" {{ not pedido.pagado?'selected' }}>No</option><option value="1" {{ pedido.pagado?'selected' }}>Sí</option></select></div>
+                    <div class="detail-row"><label>Cliente</label>
+                        <div class="cliente-search">
+                            <input type="text" placeholder="Buscar por teléfono..." autocomplete="off" oninput="filtrarClientes(this.value)">
+                            <select name="cliente_id" id="cliente-select" size="5">
+                                {% for c in clientes %}<option value="{{ c.id }}" data-phone="{{ c.telefonoNumero }}" {{ c.id==pedido.cliente.id?'selected' }}>{{ c.telefonoNumero }} — {{ c.nombre }} {{ c.apellidos }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="detail-row"><label>Gestionado por</label>
+                        <select name="trabajador_id"><option value="">— Sin asignar —</option>{% for t in trabajadores %}<option value="{{ t.id }}" {{ pedido.trabajador and pedido.trabajador.id==t.id?'selected' }}>{{ t.nombre }} {{ t.apellidos }}</option>{% endfor %}</select></div>
+                    <div class="detail-row"><label>Observaciones</label>
+                        <textarea name="observaciones" rows="3">{{ pedido.observaciones ?? '' }}</textarea></div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Aplicar cambios</button>
+                    <button type="button" class="btn-secondary" onclick="toggleEdit()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+
     </div>
 </div>
 
 <style>
-    .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-    .btn-secondary { padding: 0.5rem 1rem; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; font-size: 0.95rem; }
+    .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .header-actions { display: flex; gap: 0.75rem; }
+    .btn-primary { padding: 0.5rem 1rem; background: #ff6a00; color: white; border: none; border-radius: 4px; font-size: 0.95rem; cursor: pointer; }
+    .btn-primary:hover { background: #e55a00; }
+    .btn-secondary { padding: 0.5rem 1rem; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; font-size: 0.95rem; border: none; cursor: pointer; }
     .btn-secondary:hover { background: #5a6268; }
-
+    .flash-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 0.75rem 1rem; border-radius: 4px; margin-bottom: 1.5rem; }
+    .flash-error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 0.75rem 1rem; border-radius: 4px; margin-bottom: 1.5rem; }
     .detail-card { background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; }
-    .detail-list { margin: 0; padding: 0; }
-    .detail-row { display: flex; padding: 0.85rem 1.5rem; border-bottom: 1px solid #dee2e6; }
+    .detail-row { display: flex; align-items: flex-start; gap: 1rem; padding: 0.75rem 1.5rem; border-bottom: 1px solid #dee2e6; }
     .detail-row:last-child { border-bottom: none; }
     .detail-row:nth-child(even) { background: #f8f9fa; }
-    dt { width: 200px; flex-shrink: 0; font-weight: 600; color: #555; font-size: 0.9rem; }
-    dd { margin: 0; color: #333; font-size: 0.95rem; }
+    .detail-row dt, .detail-row label { width: 200px; flex-shrink: 0; font-weight: 600; color: #555; font-size: 0.9rem; padding-top: 0.3rem; }
+    .detail-row dd { margin: 0; color: #333; }
+    .detail-row input, .detail-row select, .detail-row textarea { flex: 1; padding: 0.5rem 0.75rem; border: 1px solid #dee2e6; border-radius: 4px; font-size: 0.95rem; font-family: inherit; }
+    .detail-row input:focus, .detail-row select:focus, .detail-row textarea:focus { outline: none; border-color: #ff6a00; }
     .link-cliente { color: #ff6a00; text-decoration: none; font-weight: 500; }
     .link-cliente:hover { text-decoration: underline; }
+    .edit-card { padding: 1.5rem; margin-bottom: 1rem; }
+    .cliente-search { flex: 1; display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-actions { display: flex; gap: 0.75rem; }
 </style>
+
+<script>
+    function toggleEdit() {
+        const detail = document.getElementById('view-detail');
+        const edit = document.getElementById('view-edit');
+        const btn = document.getElementById('btn-toggle-edit');
+        const isEditing = edit.style.display !== 'none';
+        detail.style.display = isEditing ? '' : 'none';
+        edit.style.display = isEditing ? 'none' : '';
+        btn.textContent = isEditing ? 'Editar pedido' : 'Ver detalles';
+    }
+
+    function filtrarClientes(q) {
+        const select = document.getElementById('cliente-select');
+        const term = q.trim().toLowerCase();
+        Array.from(select.options).forEach(opt => {
+            opt.hidden = term !== '' && !opt.dataset.phone.toLowerCase().includes(term);
+        });
+    }
+</script>
 {% endblock %}
 
 {% block footer %}{% endblock %}

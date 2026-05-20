@@ -12,16 +12,9 @@
                     <h1>Pedido <span class="resultado-num">#{{ pedido.id }}</span></h1>
                     <p class="resultado-sub">Aquí tienes el estado actual de tu pedido.</p>
                 </div>
+                {% set estadoLabels = {'no terminado': 'En proceso', 'terminado': 'Listo para recoger', 'recogido': 'Recogido'} %}
                 <span class="badge badge--{{ pedido.estado|replace({' ': '-'}) }} badge-lg">
-                    {% if pedido.estado == 'no terminado' %}
-                        En proceso
-                    {% elseif pedido.estado == 'terminado' %}
-                        Listo para recoger
-                    {% elseif pedido.estado == 'recogido' %}
-                        Recogido
-                    {% else %}
-                        {{ pedido.estado }}
-                    {% endif %}
+                    {{ estadoLabels[pedido.estado] ?? pedido.estado }}
                 </span>
             </div>
 
@@ -68,17 +61,12 @@
                 </tbody>
             </table>
 
-            {% if pedido.observaciones %}
             <div class="resultado-observaciones">
                 <h3>Observaciones</h3>
-                <p>{{ pedido.observaciones }}</p>
+                <p {% if not pedido.observaciones %}class="sin-observaciones"{% endif %}>
+                    {{ pedido.observaciones ?: 'No hay observaciones sobre este pedido.' }}
+                </p>
             </div>
-            {% else %}
-            <div class="resultado-observaciones">
-                <h3>Observaciones</h3>
-                <p class="sin-observaciones">No hay observaciones sobre este pedido.</p>
-            </div>
-            {% endif %}
 
             <div class="resultado-footer">
                 <a href="{{ path('app_pedido') }}" class="btn-secondary">
@@ -98,8 +86,7 @@
                 {% endfor %}
                 <form method="post" action="{{ path('app_pedido_reporte', {id: pedido.id}) }}">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token('reporte') }}">
-                    <label for="reporte-mensaje">Describe el problema o error</label>
-                    <textarea id="reporte-mensaje" name="mensaje" rows="4" placeholder="Escribe aquí tu mensaje..." required></textarea>
+                    <textarea name="mensaje" rows="4" placeholder="Describe el problema o error..." required></textarea>
                     <button type="submit" class="btn-primary">Enviar reporte</button>
                 </form>
             </div>
