@@ -144,24 +144,51 @@ class LoadFixturesCommand extends Command
         // Get trabajadores from database
         $trabajadoresList = $this->entityManager->getRepository(Trabajadores::class)->findAll();
 
+        // Get prendas from database
+        $prendasList = $this->entityManager->getRepository(Prendas::class)->findAll();
+
+        // Helper function to generate random prendas selection with contenido and price
+        $generatePrendas = function() use ($prendasList) {
+            $selectedPrendas = [];
+            $totalPrice = 0;
+            $numPrendas = rand(2, 5); // Random number of different prendas
+
+            // Shuffle and pick random prendas
+            $shuffled = $prendasList;
+            shuffle($shuffled);
+            
+            for ($i = 0; $i < min($numPrendas, count($prendasList)); $i++) {
+                $cantidad = rand(1, 8);
+                $selectedPrendas[] = [
+                    'cantidad' => $cantidad,
+                    'nombre' => $shuffled[$i]->getNombre(),
+                    'precio' => $shuffled[$i]->getPrecio(),
+                ];
+                $totalPrice += $cantidad * $shuffled[$i]->getPrecio();
+            }
+
+            // Generate contenido string
+            $contenidoParts = [];
+            foreach ($selectedPrendas as $prenda) {
+                $nombre = $prenda['nombre'];
+                // Simple pluralization: add 's' if not already ending with 's'
+                if ($prenda['cantidad'] > 1 && !str_ends_with(strtolower($nombre), 's')) {
+                    $nombre .= 's';
+                }
+                $contenidoParts[] = $prenda['cantidad'] . 'x ' . $nombre;
+            }
+            $contenido = implode(' ', $contenidoParts);
+
+            return [
+                'contenido' => $contenido,
+                'precio' => round($totalPrice, 2),
+            ];
+        };
+
         // Crear 100 pedidos para testing de reportes
         $pedidos = [];
-        $contents = [
-            'Lavado normal: 3 camisas, 2 pantalones',
-            'Lavado delicado: vestido de seda, ropa interior',
-            'Lavado en seco: abrigo de lana, quitar manchas',
-            'Quitar manchas: chaqueta de cuero, planchado',
-            'Lavado normal: sábanas, toallas, mantel',
-            'Planchado express: 5 camisas de trabajo',
-            'Limpieza profunda: edredón, almohadas',
-            'Lavado especial: ropa deportiva, zapatos',
-            'Tintorería: pantalón formal, corbata',
-            'Lavado a mano: prendas delicadas, encaje',
-        ];
-        $nc = count($contents);
         $cl = count($clientesList) - 1;
         $tl = count($trabajadoresList) - 1;
-        $ci = 0; // índice de contenido
 
         // FEBRERO 2026 — 18 pedidos (recogido + pagado)
         $febDates = [
@@ -173,7 +200,8 @@ class LoadFixturesCommand extends Command
         foreach ($febDates as $date) {
             $dIn  = new DateTime($date);
             $dOut = (clone $dIn)->modify('+' . rand(1, 3) . ' days');
-            $pedidos[] = ['estado'=>'recogido','contenido'=>$contents[$ci++ % $nc],'fecha_entrada'=>$dIn,'fecha_salida'=>$dOut,'precio'=>rand(12,32),'pagado'=>true,'cliente'=>$clientesList[rand(0,$cl)],'trabajador'=>$trabajadoresList[rand(0,$tl)]];
+            $prendas = $generatePrendas();
+            $pedidos[] = ['estado'=>'recogido','contenido'=>$prendas['contenido'],'fecha_entrada'=>$dIn,'fecha_salida'=>$dOut,'precio'=>$prendas['precio'],'pagado'=>true,'cliente'=>$clientesList[rand(0,$cl)],'trabajador'=>$trabajadoresList[rand(0,$tl)]];
         }
 
         // MARZO 2026 — 22 pedidos (recogido + pagado)
@@ -187,7 +215,8 @@ class LoadFixturesCommand extends Command
         foreach ($marDates as $date) {
             $dIn  = new DateTime($date);
             $dOut = (clone $dIn)->modify('+' . rand(1, 3) . ' days');
-            $pedidos[] = ['estado'=>'recogido','contenido'=>$contents[$ci++ % $nc],'fecha_entrada'=>$dIn,'fecha_salida'=>$dOut,'precio'=>rand(12,35),'pagado'=>true,'cliente'=>$clientesList[rand(0,$cl)],'trabajador'=>$trabajadoresList[rand(0,$tl)]];
+            $prendas = $generatePrendas();
+            $pedidos[] = ['estado'=>'recogido','contenido'=>$prendas['contenido'],'fecha_entrada'=>$dIn,'fecha_salida'=>$dOut,'precio'=>$prendas['precio'],'pagado'=>true,'cliente'=>$clientesList[rand(0,$cl)],'trabajador'=>$trabajadoresList[rand(0,$tl)]];
         }
 
         // ABRIL 2026 — 25 pedidos (recogido + pagado)
@@ -201,7 +230,8 @@ class LoadFixturesCommand extends Command
         foreach ($aprDates as $date) {
             $dIn  = new DateTime($date);
             $dOut = (clone $dIn)->modify('+' . rand(1, 3) . ' days');
-            $pedidos[] = ['estado'=>'recogido','contenido'=>$contents[$ci++ % $nc],'fecha_entrada'=>$dIn,'fecha_salida'=>$dOut,'precio'=>rand(13,38),'pagado'=>true,'cliente'=>$clientesList[rand(0,$cl)],'trabajador'=>$trabajadoresList[rand(0,$tl)]];
+            $prendas = $generatePrendas();
+            $pedidos[] = ['estado'=>'recogido','contenido'=>$prendas['contenido'],'fecha_entrada'=>$dIn,'fecha_salida'=>$dOut,'precio'=>$prendas['precio'],'pagado'=>true,'cliente'=>$clientesList[rand(0,$cl)],'trabajador'=>$trabajadoresList[rand(0,$tl)]];
         }
 
         // MAYO 1-12 — 15 pedidos (recogido + pagado)
@@ -213,7 +243,8 @@ class LoadFixturesCommand extends Command
         foreach ($mayEDates as $date) {
             $dIn  = new DateTime($date);
             $dOut = (clone $dIn)->modify('+' . rand(1, 2) . ' days');
-            $pedidos[] = ['estado'=>'recogido','contenido'=>$contents[$ci++ % $nc],'fecha_entrada'=>$dIn,'fecha_salida'=>$dOut,'precio'=>rand(14,35),'pagado'=>true,'cliente'=>$clientesList[rand(0,$cl)],'trabajador'=>$trabajadoresList[rand(0,$tl)]];
+            $prendas = $generatePrendas();
+            $pedidos[] = ['estado'=>'recogido','contenido'=>$prendas['contenido'],'fecha_entrada'=>$dIn,'fecha_salida'=>$dOut,'precio'=>$prendas['precio'],'pagado'=>true,'cliente'=>$clientesList[rand(0,$cl)],'trabajador'=>$trabajadoresList[rand(0,$tl)]];
         }
 
         // MAYO 13-17 — 10 pedidos terminados (listos, no pagados aún)
@@ -224,13 +255,15 @@ class LoadFixturesCommand extends Command
         foreach ($mayTermDates as $date) {
             $dOut = new DateTime($date);
             $dIn  = (clone $dOut)->modify('-' . rand(1, 2) . ' days');
-            $pedidos[] = ['estado'=>'terminado','contenido'=>$contents[$ci++ % $nc],'fecha_entrada'=>$dIn,'fecha_salida'=>$dOut,'precio'=>rand(14,38),'pagado'=>false,'cliente'=>$clientesList[rand(0,$cl)],'trabajador'=>$trabajadoresList[rand(0,$tl)]];
+            $prendas = $generatePrendas();
+            $pedidos[] = ['estado'=>'terminado','contenido'=>$prendas['contenido'],'fecha_entrada'=>$dIn,'fecha_salida'=>$dOut,'precio'=>$prendas['precio'],'pagado'=>false,'cliente'=>$clientesList[rand(0,$cl)],'trabajador'=>$trabajadoresList[rand(0,$tl)]];
         }
 
         // MAYO 16-18 — 10 pedidos en curso (no terminados, no pagados)
         for ($i = 0; $i < 10; $i++) {
             $dIn = new DateTime('2026-05-' . str_pad(rand(16, 18), 2, '0', STR_PAD_LEFT));
-            $pedidos[] = ['estado'=>'no terminado','contenido'=>$contents[$ci++ % $nc],'fecha_entrada'=>$dIn,'fecha_salida'=>null,'precio'=>rand(12,40),'pagado'=>false,'cliente'=>$clientesList[rand(0,$cl)],'trabajador'=>$trabajadoresList[rand(0,$tl)]];
+            $prendas = $generatePrendas();
+            $pedidos[] = ['estado'=>'no terminado','contenido'=>$prendas['contenido'],'fecha_entrada'=>$dIn,'fecha_salida'=>null,'precio'=>$prendas['precio'],'pagado'=>false,'cliente'=>$clientesList[rand(0,$cl)],'trabajador'=>$trabajadoresList[rand(0,$tl)]];
         }
 
         foreach ($pedidos as $pedido) {
