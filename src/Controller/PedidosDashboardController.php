@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Pedidos;
 use App\Repository\ClientesRepository;
 use App\Repository\PedidosRepository;
+use App\Repository\PrendasRepository;
 use App\Repository\TrabajadoresRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -50,8 +52,61 @@ class PedidosDashboardController extends AbstractController
         ]);
     }
 
+    #[Route('/dashboard/pedidos/crear', name: 'app_pedido_create', methods: ['GET'])]
+    public function create(Request $request, ClientesRepository $clientesRepo, TrabajadoresRepository $trabajadoresRepo, PrendasRepository $prendasRepo): Response
+    {
+        if ($r = $this->requireLogin($request)) return $r;
+        $s = $request->getSession();
+        return $this->render('pedidos/detalle.html.twig', [
+            'pedido' => null,
+            'clientes' => $clientesRepo->findBy([], ['nombre' => 'ASC']),
+            'trabajadores' => $trabajadoresRepo->findBy([], ['nombre' => 'ASC']),
+            'prendas' => $prendasRepo->findBy([], ['nombre' => 'ASC']),
+            'trabajador_name' => $s->get('trabajador_name'),
+            'trabajador_role' => $s->get('trabajador_role'),
+        ]);
+    }
+
+    #[Route('/dashboard/pedidos/crear', name: 'app_pedido_store', methods: ['POST'])]
+    public function store(Request $request, ClientesRepository $clientesRepo, TrabajadoresRepository $trabajadoresRepo, EntityManagerInterface $em): Response
+    {
+        if ($r = $this->requireLogin($request)) return $r;
+
+        $cliente = $clientesRepo->find((int) $request->request->get('cliente_id'));
+        if (!$cliente) {
+            $this->addFlash('error', 'Debe seleccionar un cliente válido.');
+            return $this->redirectToRoute('app_pedido_create');
+        }
+
+        $fechaEntrada = \DateTime::createFromFormat('d/m/Y H:i', $request->request->get('fecha_entrada'));
+        $fechaSalidaStr = $request->request->get('fecha_salida');
+        $fechaSalida = $fechaSalidaStr ? \DateTime::createFromFormat('d/m/Y H:i', $fechaSalidaStr) : null;
+        if (!$fechaEntrada || ($fechaSalidaStr && !$fechaSalida)) {
+            $this->addFlash('error', 'Fecha inválida. Usa dd/mm/aaaa hh:mm');
+            return $this->redirectToRoute('app_pedido_create');
+        }
+
+        $trabajadorId = $request->request->get('trabajador_id');
+        $pedido = (new Pedidos())
+            ->setCliente($cliente)
+            ->setEstado($request->request->get('estado') ?: 'no terminado')
+            ->setContenido($request->request->get('contenido') ?: '')
+            ->setFechaEntrada($fechaEntrada)
+            ->setFechaSalida($fechaSalida)
+            ->setPrecio((float) str_replace(',', '.', $request->request->get('precio') ?: 0))
+            ->setPagado((bool) $request->request->get('pagado'))
+            ->setTrabajador($trabajadorId ? $trabajadoresRepo->find((int) $trabajadorId) : null)
+            ->setObservaciones($request->request->get('observaciones') ?: null);
+
+        $em->persist($pedido);
+        $em->flush();
+
+        $this->addFlash('success', 'Pedido #' . $pedido->getId() . ' creado.');
+        return $this->redirectToRoute('app_pedido_detail', ['id' => $pedido->getId()]);
+    }
+
     #[Route('/dashboard/pedidos/{id}', name: 'app_pedido_detail', methods: ['GET'])]
-    public function detail(int $id, Request $request, PedidosRepository $pedidosRepo, ClientesRepository $clientesRepo, TrabajadoresRepository $trabajadoresRepo): Response
+    public function detail(int $id, Request $request, PedidosRepository $pedidosRepo, ClientesRepository $clientesRepo, TrabajadoresRepository $trabajadoresRepo, PrendasRepository $prendasRepo): Response
     {
         if ($r = $this->requireLogin($request)) return $r;
 
@@ -65,6 +120,7 @@ class PedidosDashboardController extends AbstractController
             'pedido' => $pedido,
             'clientes' => $clientesRepo->findBy([], ['nombre' => 'ASC']),
             'trabajadores' => $trabajadoresRepo->findBy([], ['nombre' => 'ASC']),
+            'prendas' => $prendasRepo->findBy([], ['nombre' => 'ASC']),
             'trabajador_name' => $session->get('trabajador_name'),
             'trabajador_role' => $session->get('trabajador_role'),
         ]);

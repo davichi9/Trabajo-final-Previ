@@ -1,6 +1,6 @@
 {% extends "base.html.twig" %}
 
-{% block title %}Pedido #{{ pedido.id }} - Lavandería{% endblock %}
+{% block title %}{{ pedido ? 'Pedido #' ~ pedido.id : 'Crear Pedido' }} - Lavandería{% endblock %}
 
 {% block body %}
 <div class="dashboard-container">
@@ -18,9 +18,11 @@
 
     <div class="dashboard-content">
         <div class="content-header">
-            <h1>Detalles del pedido #{{ pedido.id }}</h1>
+            <h1>{{ pedido ? 'Detalles del pedido #' ~ pedido.id : 'Crear nuevo pedido' }}</h1>
             <div class="header-actions">
-                <button type="button" class="btn-primary" id="btn-toggle-edit" onclick="toggleEdit()">Editar pedido</button>
+                {% if pedido %}
+                    <button type="button" class="btn-primary" id="btn-toggle-edit" onclick="toggleEdit()">Editar pedido</button>
+                {% endif %}
                 <a href="{{ path('app_pedidos_list') }}" class="btn-secondary">Volver a pedidos</a>
             </div>
         </div>
@@ -28,7 +30,8 @@
         {% for msg in app.flashes('success') %}<div class="flash-success">{{ msg }}</div>{% endfor %}
         {% for msg in app.flashes('error') %}<div class="flash-error">{{ msg }}</div>{% endfor %}
 
-        {# Vista de detalle #}
+        {# Vista de detalle (solo si es un pedido existente) #}
+        {% if pedido %}
         <div id="view-detail">
             <div class="detail-card">
                 <div class="detail-row"><dt>Número de pedido</dt><dd>#{{ pedido.id }}</dd></div>
@@ -44,39 +47,65 @@
                     <div class="detail-row"><dt>Observaciones</dt><dd>{{ pedido.observaciones ?? '—' }}</dd></div>
             </div>
         </div>
+        {% endif %}
 
-        {# Formulario de edición (oculto por defecto) #}
-        <div id="view-edit" style="display:none">
-            <form method="POST" action="{{ path('app_pedido_edit', {id: pedido.id}) }}">
+        {# Formulario de edición/creación #}
+        <div id="view-edit" {% if pedido %}style="display:none"{% endif %}>
+            <form method="POST" action="{{ pedido ? path('app_pedido_edit', {id: pedido.id}) : path('app_pedido_store') }}">
                 <div class="detail-card edit-card">
                     <div class="detail-row"><label>Estado</label>
-                        <select name="estado">{% for val in ['no terminado','terminado','recogido'] %}<option value="{{ val }}" {{ pedido.estado==val?'selected' }}>{{ val|capitalize }}</option>{% endfor %}</select></div>
-                    <div class="detail-row"><label>Contenido</label>
-                        <textarea name="contenido" rows="3">{{ pedido.contenido }}</textarea></div>
+                        <select name="estado">{% for val in ['no terminado','terminado','recogido'] %}<option value="{{ val }}" {{ pedido and pedido.estado==val?'selected' }}>{{ val|capitalize }}</option>{% endfor %}</select></div>
+                    <div class="detail-row prendas-row"><label>Prendas</label>
+                        <div class="prendas-picker">
+                            <input type="hidden" name="contenido" id="contenido-hidden" value="{{ pedido ? pedido.contenido : '' }}">
+                            <input type="hidden" name="precio" id="precio-input" value="{{ pedido ? pedido.precio : '0' }}">
+                            <table class="prendas-table">
+                                <thead><tr><th>Prenda</th><th>Precio/ud</th><th>Cantidad</th><th>Subtotal</th></tr></thead>
+                                <tbody>
+                                {% for p in prendas %}
+                                <tr>
+                                    <td>{{ p.nombre }}</td>
+                                    <td class="precio-col">{{ p.precio|number_format(2, ',', '.') }} €</td>
+                                    <td class="qty-col">
+                                        <div class="qty-control">
+                                            <button type="button" class="qty-btn" onclick="cambiarQty(this,-1)">−</button>
+                                            <input type="number" class="qty-input" value="0" min="0" max="99"
+                                                data-precio="{{ p.precio }}" data-nombre="{{ p.nombre }}"
+                                                oninput="syncPrendas()">
+                                            <button type="button" class="qty-btn" onclick="cambiarQty(this,1)">+</button>
+                                        </div>
+                                    </td>
+                                    <td class="subtotal-col"><span class="subtotal-prenda">0,00 €</span></td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            <div class="prendas-total">Total calculado: <strong id="prendas-total-val">0,00 €</strong></div>
+                        </div>
+                    </div>
                     <div class="detail-row"><label>Fecha entrada</label>
-                        <input type="text" name="fecha_entrada" placeholder="dd/mm/aaaa hh:mm" value="{{ pedido.fechaEntrada|date('d/m/Y H:i') }}"></div>
+                        <input type="text" name="fecha_entrada" placeholder="dd/mm/aaaa hh:mm" value="{{ pedido ? pedido.fechaEntrada|date('d/m/Y H:i') : '' }}"></div>
                     <div class="detail-row"><label>Fecha salida</label>
-                        <input type="text" name="fecha_salida" placeholder="dd/mm/aaaa hh:mm (opcional)" value="{{ pedido.fechaSalida ? pedido.fechaSalida|date('d/m/Y H:i') : '' }}"></div>
-                    <div class="detail-row"><label>Precio (€)</label>
-                        <input type="number" name="precio" step="0.01" min="0" value="{{ pedido.precio }}"></div>
+                        <input type="text" name="fecha_salida" placeholder="dd/mm/aaaa hh:mm (opcional)" value="{{ pedido and pedido.fechaSalida ? pedido.fechaSalida|date('d/m/Y H:i') : '' }}"></div>
                     <div class="detail-row"><label>Pagado</label>
-                        <select name="pagado"><option value="0" {{ not pedido.pagado?'selected' }}>No</option><option value="1" {{ pedido.pagado?'selected' }}>Sí</option></select></div>
+                        <select name="pagado"><option value="0" {{ not pedido or not pedido.pagado?'selected' }}>No</option><option value="1" {{ pedido and pedido.pagado?'selected' }}>Sí</option></select></div>
                     <div class="detail-row"><label>Cliente</label>
                         <div class="cliente-search">
                             <input type="text" placeholder="Buscar por teléfono..." autocomplete="off" oninput="filtrarClientes(this.value)">
-                            <select name="cliente_id" id="cliente-select" size="5">
-                                {% for c in clientes %}<option value="{{ c.id }}" data-phone="{{ c.telefonoNumero }}" {{ c.id==pedido.cliente.id?'selected' }}>{{ c.telefonoNumero }} — {{ c.nombre }} {{ c.apellidos }}</option>{% endfor %}
+                            <select name="cliente_id" id="cliente-select" size="5" required>
+                                <option value="">-- Selecciona un cliente --</option>
+                                {% for c in clientes %}<option value="{{ c.id }}" data-phone="{{ c.telefonoNumero }}" {{ pedido and c.id==pedido.cliente.id?'selected' }}>{{ c.telefonoNumero }} — {{ c.nombre }} {{ c.apellidos }}</option>{% endfor %}
                             </select>
                         </div>
                     </div>
                     <div class="detail-row"><label>Gestionado por</label>
-                        <select name="trabajador_id"><option value="">— Sin asignar —</option>{% for t in trabajadores %}<option value="{{ t.id }}" {{ pedido.trabajador and pedido.trabajador.id==t.id?'selected' }}>{{ t.nombre }} {{ t.apellidos }}</option>{% endfor %}</select></div>
+                        <select name="trabajador_id"><option value="">— Sin asignar —</option>{% for t in trabajadores %}<option value="{{ t.id }}" {{ pedido and pedido.trabajador and pedido.trabajador.id==t.id?'selected' }}>{{ t.nombre }} {{ t.apellidos }}</option>{% endfor %}</select></div>
                     <div class="detail-row"><label>Observaciones</label>
-                        <textarea name="observaciones" rows="3">{{ pedido.observaciones ?? '' }}</textarea></div>
+                        <textarea name="observaciones" rows="3">{{ pedido ? pedido.observaciones ?? '' : '' }}</textarea></div>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn-primary">Aplicar cambios</button>
-                    <button type="button" class="btn-secondary" onclick="toggleEdit()">Cancelar</button>
+                    <button type="submit" class="btn-primary">{{ pedido ? 'Aplicar cambios' : 'Crear pedido' }}</button>
+                    {% if pedido %}<button type="button" class="btn-secondary" onclick="toggleEdit()">Cancelar</button>{% else %}<a href="{{ path('app_pedidos_list') }}" class="btn-secondary">Cancelar</a>{% endif %}
                 </div>
             </form>
         </div>
@@ -106,6 +135,23 @@
     .edit-card { padding: 1.5rem; margin-bottom: 1rem; }
     .cliente-search { flex: 1; display: flex; flex-direction: column; gap: 0.4rem; }
     .form-actions { display: flex; gap: 0.75rem; }
+    /* Prendas picker */
+    .prendas-row { align-items: flex-start; }
+    .prendas-picker { flex: 1; }
+    .prendas-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .prendas-table th { background: #f8f9fa; padding: 0.5rem 0.75rem; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #dee2e6; }
+    .prendas-table td { padding: 0.4rem 0.75rem; border-bottom: 1px solid #f0f0f0; }
+    .prendas-table tr:last-child td { border-bottom: none; }
+    .precio-col, .subtotal-col { text-align: right; white-space: nowrap; }
+    .qty-col { text-align: center; }
+    .qty-control { display: inline-flex; align-items: center; gap: 0.3rem; }
+    .qty-btn { width: 26px; height: 26px; border: 1px solid #dee2e6; background: #fff; border-radius: 4px; font-size: 1rem; cursor: pointer; line-height: 1; padding: 0; }
+    .qty-btn:hover { background: #ff6a00; color: white; border-color: #ff6a00; }
+    .qty-input { width: 42px; text-align: center; padding: 0.25rem; border: 1px solid #dee2e6; border-radius: 4px; font-size: 0.9rem; }
+    .subtotal-prenda { font-weight: 500; color: #333; }
+    .subtotal-prenda.active { color: #ff6a00; font-weight: 700; }
+    .prendas-total { margin-top: 0.75rem; text-align: right; font-size: 0.95rem; color: #333; padding-top: 0.5rem; border-top: 2px solid #dee2e6; }
+    #prendas-total-val { color: #ff6a00; font-size: 1.1rem; }
 </style>
 
 <script>
@@ -126,6 +172,55 @@
             opt.hidden = term !== '' && !opt.dataset.phone.toLowerCase().includes(term);
         });
     }
+
+    function cambiarQty(btn, delta) {
+        const input = btn.parentElement.querySelector('.qty-input');
+        input.value = Math.max(0, Math.min(99, parseInt(input.value || 0) + delta));
+        syncPrendas();
+    }
+
+    function syncPrendas() {
+        const inputs = document.querySelectorAll('.prendas-table .qty-input');
+        let total = 0;
+        const partes = [];
+        inputs.forEach(input => {
+            const qty = Math.max(0, Math.min(99, parseInt(input.value) || 0));
+            const precio = parseFloat(input.dataset.precio);
+            const nombre = input.dataset.nombre;
+            const subtotal = qty * precio;
+            total += subtotal;
+            const span = input.closest('tr').querySelector('.subtotal-prenda');
+            span.textContent = formatEur(subtotal);
+            span.classList.toggle('active', qty > 0);
+            if (qty > 0) partes.push(qty + 'x ' + nombre);
+        });
+        document.getElementById('prendas-total-val').textContent = formatEur(total);
+        document.getElementById('contenido-hidden').value = partes.join(', ');
+        document.getElementById('precio-input').value = total.toFixed(2);
+    }
+
+    function formatEur(n) {
+        return n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+    }
+
+    // Al cargar la página: parsear contenido existente y pre-rellenar cantidades
+    document.addEventListener('DOMContentLoaded', function () {
+        const contenidoActual = document.getElementById('contenido-hidden').value.trim();
+        if (!contenidoActual) return;
+        // Formato esperado: "3x Americana, 2x Pantalón"
+        const mapa = {};
+        contenidoActual.split(',').forEach(parte => {
+            const m = parte.trim().match(/^(\d+)x\s+(.+)$/);
+            if (m) mapa[m[2].trim()] = parseInt(m[1]);
+        });
+        document.querySelectorAll('.prendas-table .qty-input').forEach(input => {
+            const nombre = input.dataset.nombre;
+            if (mapa[nombre]) {
+                input.value = mapa[nombre];
+            }
+        });
+        syncPrendas();
+    });
 </script>
 {% endblock %}
 
