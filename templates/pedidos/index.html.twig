@@ -19,7 +19,10 @@
     <div class="dashboard-content">
         <div class="content-header">
             <h1>Lista de pedidos</h1>
-            <a href="{{ path('app_dashboard') }}" class="btn-secondary">Volver al Dashboard</a>
+            <div class="header-actions">
+                <a href="{{ path('app_pedido_create') }}" class="btn-primary">+ Añadir Pedido</a>
+                <a href="{{ path('app_dashboard') }}" class="btn-secondary">Volver al Dashboard</a>
+            </div>
         </div>
 
         <div class="search-box-container">
